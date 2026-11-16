@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Tester\**" />
+    <EmbeddedResource Remove="Tester\**" />
+    <None Remove="Tester\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Instances\Usables\Books\" />
+    <Folder Include="Instances\Usables\Scrolls\" />
+    <Folder Include="Instances\Usables\Tools\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CharacterMainLib\CharacterMainLib.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,30 @@
+{
+  "Category": "Armor",
+
+  "Id": 702,
+  "Name": "Iron Helmet",
+  "Description": "A sturdy iron helmet.",
+  "Weight": 2.3,
+  "Price": 75,
+
+  "Icon": "Icons/Armor/IronHelmet.png",
+  "Miniature2D": "Miniatures2D/Armor/IronHelmet.png",
+
+  "IsStackable": false,
+  "MaxStackSize": 1,
+
+  "Equipable": {
+    "EquipmentCategory": "Head",
+    "LevelRequired": 1,
+    "Effects": []
+  },
+
+  "Durable": {
+    "MaxDurability": 650,
+    "IsIndestructible": false
+  },
+
+  "Armor": {
+    "MaxDefence": 15
+  }
+}

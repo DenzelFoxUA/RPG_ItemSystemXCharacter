@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CharacterMainLib\CharacterMainLib.csproj" />
+    <ProjectReference Include="..\RPGInventoryProject\InventoryCoreLib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="JSON_Data\Characters\" />
+    <Folder Include="JSON_Data\Items\Consumables\" />
+    <Folder Include="JSON_Data\Items\Armor\" />
+    <Folder Include="JSON_Data\Items\Jewelry\" />
+    <Folder Include="JSON_Data\Items\Ammunition\" />
+    <Folder Include="JSON_Data\Items\Scrools\" />
+    <Folder Include="JSON_Data\Items\Tools\" />
+    <Folder Include="JSON_Data\Items\Weapons\" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<None Update="JSON_Data\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+
+</Project>

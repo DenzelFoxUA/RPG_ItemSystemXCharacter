@@ -1,0 +1,38 @@
+{
+  "Name": "Warrior",
+
+  "BaseFeatures": {
+    "MaxLevel": 99,
+    "MaxSpeed": 12.0,
+    "BaseSpeed": 5.0,
+    "BaseCarryWeight": 50.0,
+    "MinCarryWeight": 0.0,
+    "MaxCarryWeight": 200.0,
+    "MinAttributeValue": 1,
+    "MaxAttributeValue": 30
+  },
+
+  "Vitals": {
+    "Health": {
+      "StartMax": 150,
+      "Peak": 500
+    },
+    "Mana": {
+      "StartMax": 50,
+      "Peak": 500
+    },
+    "Stamina": {
+      "StartMax": 120,
+      "Peak": 500
+    }
+  },
+
+    "Attributes": {
+        "Dexterity": { "CurrAttributeValue": 6 },
+        "Strength": { "CurrAttributeValue": 8 },
+        "Willpower": { "CurrAttributeValue": 5 },
+        "Endurance": { "CurrAttributeValue": 8 },
+        "Luck": { "CurrAttributeValue": 5 },
+        "Intelligence": { "CurrAttributeValue": 5 }
+    }
+}

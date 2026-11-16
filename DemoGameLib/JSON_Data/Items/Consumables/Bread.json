@@ -1,0 +1,36 @@
+{
+  "Category": "Consumable",
+
+  "Id": 603,
+  "Name": "Bread",
+  "Description": "A simple loaf of bread.",
+  "Weight": 0.4,
+  "Price": 6,
+
+  "Icon": "Icons/Food/Bread.png",
+  "Miniature2D": "Miniatures2D/Food/Bread.png",
+
+  "IsStackable": true,
+  "MaxStackSize": 10,
+
+  "Consumable": {
+    "IsSelfApplycable": true,
+    "ConsumableType": "Food",
+    "Volume": 1,
+
+    "CustomEffects": [
+      {
+        "Type": "RecoveryVital",
+        "Name": "Restore Health",
+        "VitalName": "Health",
+        "Power": 8
+      },
+      {
+        "Type": "RecoveryVital",
+        "Name": "Restore Stamina",
+        "VitalName": "Stamina",
+        "Power": 15
+      }
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "Category": "Consumable",
+
+  "Id": 501,
+  "Name": "Greater Health Potion",
+  "Description": "Immansely restores health. Has huge resoration potential",
+  "Volume" : 20,
+
+  "Weight": 0.2,
+  "Price": 75,
+
+  "Icon": "Icons/HealthPotion.png",
+  "Miniature2D": "Miniatures2D/HealthPotion.png",
+
+  "IsStackable": true,
+  "MaxStackSize": 5,
+
+  "Consumable": {
+    "IsSelfApplycable": true,
+    "ConsumableType": "Potion",
+    "Volume" : 20,
+    
+    "CustomEffects": [
+      {
+        "Type": "RecoveryVital",
+        "Name": "Restore Health",
+        "VitalName": "Health",
+        "Power": 25
+      }
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "Category": "Consumable",
+
+  "Id": 503,
+  "Name": "Stamina Potion",
+  "Description": "Restores Stamina.",
+
+  "Weight": 0.2,
+  "Price": 75,
+
+  "Icon": "Icons/StaminaPotion.png",
+  "Miniature2D": "Miniatures2D/StaminaPotion.png",
+
+  "IsStackable": true,
+  "MaxStackSize": 5,
+
+  "Consumable": {
+    "IsSelfApplycable": true,
+    "ConsumableType": "Potion",
+    "Volume" : 20,
+    
+    "CustomEffects": [
+      {
+        "Type": "RecoveryVital",
+        "Name": "Restore Stamina",
+        "VitalName": "Stamina",
+        "Power": 25
+      }
+    ]
+  }
+}

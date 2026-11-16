@@ -1,0 +1,30 @@
+{
+  "Category": "Armor",
+
+  "Id": 705,
+  "Name": "Wooden Shield",
+  "Description": "A wooden shield reinforced with iron.",
+  "Weight": 4.2,
+  "Price": 80,
+
+  "Icon": "Icons/Armor/WoodenShield.png",
+  "Miniature2D": "Miniatures2D/Armor/WoodenShield.png",
+
+  "IsStackable": false,
+  "MaxStackSize": 1,
+
+  "Equipable": {
+    "EquipmentCategory": "Shield",
+    "LevelRequired": 1,
+    "Effects": []
+  },
+
+  "Durable": {
+    "MaxDurability": 700,
+    "IsIndestructible": false
+  },
+
+  "Armor": {
+    "MaxDefence": 20
+  }
+}

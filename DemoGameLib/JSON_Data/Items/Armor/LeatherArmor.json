@@ -1,0 +1,30 @@
+{
+  "Category": "Armor",
+
+  "Id": 701,
+  "Name": "Leather Armor",
+  "Description": "A light leather armor.",
+  "Weight": 6.5,
+  "Price": 120,
+
+  "Icon": "Icons/Armor/LeatherArmor.png",
+  "Miniature2D": "Miniatures2D/Armor/LeatherArmor.png",
+
+  "IsStackable": false,
+  "MaxStackSize": 1,
+
+  "Equipable": {
+    "EquipmentCategory": "Body",
+    "LevelRequired": 1,
+    "Effects": []
+  },
+
+  "Durable": {
+    "MaxDurability": 800,
+    "IsIndestructible": false
+  },
+
+  "Armor": {
+    "MaxDefence": 25
+  }
+}

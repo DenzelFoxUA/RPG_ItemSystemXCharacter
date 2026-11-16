@@ -1,0 +1,29 @@
+{
+  "Category": "Jewelry",
+
+  "Id": 801,
+  "Name": "Copper Amulet",
+  "Description": "A simple copper amulet. But some power in it hidden",
+  "Weight": 0.15,
+  "Price": 90,
+
+  "Icon": "Icons/Jewelry/CopperAmulet.png",
+  "Miniature2D": "Miniatures2D/Jewelry/CopperAmulet.png",
+
+  "IsStackable": false,
+  "MaxStackSize": 1,
+
+  "Equipable": {
+    "EquipmentCategory": "Amulet",
+    "LevelRequired": 1,
+
+    "Effects": [
+      {
+        "Type": "IncreaseAttribute",
+        "Name": "Amulet Strength +1",
+        "AttributeName": "Strength",
+        "Power": 1
+      }
+    ]
+  }
+}

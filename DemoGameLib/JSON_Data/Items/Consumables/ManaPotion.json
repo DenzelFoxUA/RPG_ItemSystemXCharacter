@@ -1,0 +1,31 @@
+{
+  "Category": "Consumable",
+
+  "Id": 502,
+  "Name": "Mana Potion",
+  "Description": "Restores mana.",
+
+  "Weight": 0.2,
+  "Price": 75,
+
+  "Icon": "Icons/ManaPotion.png",
+  "Miniature2D": "Miniatures2D/ManaPotion.png",
+
+  "IsStackable": true,
+  "MaxStackSize": 5,
+
+  "Consumable": {
+    "IsSelfApplycable": true,
+    "ConsumableType": "Potion",
+    "Volume" : 20,
+    
+    "CustomEffects": [
+      {
+        "Type": "RecoveryVital",
+        "Name": "Restore Mana",
+        "VitalName": "Mana",
+        "Power": 25
+      }
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "Category": "Weapon",
+  "Type": "Dagger",
+
+  "Id": 144,
+  "Name": "Poisoned Dagger",
+  "Description": "Steel dagger coated with poison.",
+
+  "Weight": 0.5,
+  "Price": 100,
+
+  "Icon": "Icons/Dagger.png",
+  "Miniature2D": "Miniatures2D/Dagger.png",
+
+  "IsStackable": false,
+  "MaxStackSize": 1,
+
+  "Equipable": {
+    "EquipmentCategory": "OneHanded",
+    "LevelRequired": 1,
+
+    "Effects": [
+      {
+        "Type": "TempDrainHealth",
+        "Name": "Poison",
+        "Duration": 5.0,
+        "Power": 5
+      }
+    ]
+  },
+
+  "Durable": {
+    "MaxDurability": 1000,
+    "IsIndestructible": false
+  },
+
+  "Weapon": {
+    "IsTwoHanded": false,
+
+    "PrimaryAttack": {
+      "MaxDamage": 7,
+      "AttackRange": 1.5
+    },
+
+    "SecondaryAttack": {
+      "MaxDamage": 12,
+      "AttackRange": 1.0
+    }
+  }
+}

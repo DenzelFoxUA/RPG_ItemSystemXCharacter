@@ -1,0 +1,29 @@
+{
+  "Category": "Jewelry",
+
+  "Id": 802,
+  "Name": "Golden Ring",
+  "Description": "A finely crafted golden ring.",
+  "Weight": 0.05,
+  "Price": 125,
+
+  "Icon": "Icons/Jewelry/GoldenRing.png",
+  "Miniature2D": "Miniatures2D/Jewelry/GoldenRing.png",
+
+  "IsStackable": false,
+  "MaxStackSize": 1,
+
+  "Equipable": {
+    "EquipmentCategory": "Ring",
+    "LevelRequired": 1,
+
+    "Effects": [
+      {
+        "Type": "IncreaseAttribute",
+        "Name": "Ring Dexterity +2",
+        "AttributeName": "Dexterity",
+        "Power": 2
+      }
+    ]
+  }
+}

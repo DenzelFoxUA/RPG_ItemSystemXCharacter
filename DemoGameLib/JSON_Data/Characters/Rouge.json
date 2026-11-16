@@ -1,0 +1,38 @@
+{
+  "Name": "Rouge",
+
+  "BaseFeatures": {
+    "MaxLevel": 99,
+    "MaxSpeed": 12.0,
+    "BaseSpeed": 5.0,
+    "BaseCarryWeight": 30.0,
+    "MinCarryWeight": 0.0,
+    "MaxCarryWeight": 200.0,
+    "MinAttributeValue": 3,
+    "MaxAttributeValue": 30
+  },
+
+  "Vitals": {
+    "Health": {
+      "StartMax": 100,
+      "Peak": 500
+    },
+    "Mana": {
+      "StartMax": 100,
+      "Peak": 500
+    },
+    "Stamina": {
+      "StartMax": 120,
+      "Peak": 500
+    }
+  },
+
+    "Attributes": {
+        "Dexterity": { "CurrAttributeValue": 8 },
+        "Strength": { "CurrAttributeValue": 5 },
+        "Willpower": { "CurrAttributeValue": 6 },
+        "Endurance": { "CurrAttributeValue": 5 },
+        "Luck": { "CurrAttributeValue": 7 },
+        "Intelligence": { "CurrAttributeValue": 6 }
+    }
+}

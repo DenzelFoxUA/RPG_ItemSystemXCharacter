@@ -1,0 +1,36 @@
+{
+  "Category": "Consumable",
+
+  "Id": 604,
+  "Name": "Nuts",
+  "Description": "A handful of nutritious nuts.",
+  "Weight": 0.2,
+  "Price": 8,
+
+  "Icon": "Icons/Food/Nuts.png",
+  "Miniature2D": "Miniatures2D/Food/Nuts.png",
+
+  "IsStackable": true,
+  "MaxStackSize": 20,
+
+  "Consumable": {
+    "IsSelfApplycable": true,
+    "ConsumableType": "Food",
+    "Volume": 1,
+
+    "CustomEffects": [
+      {
+        "Type": "RecoveryVital",
+        "Name": "Restore Health",
+        "VitalName": "Health",
+        "Power": 5
+      },
+      {
+        "Type": "RecoveryVital",
+        "Name": "Restore Stamina",
+        "VitalName": "Stamina",
+        "Power": 20
+      }
+    ]
+  }
+}

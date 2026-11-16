@@ -1,0 +1,30 @@
+{
+  "Category": "Armor",
+
+  "Id": 704,
+  "Name": "Leather Boots",
+  "Description": "Durable leather boots.",
+  "Weight": 1.4,
+  "Price": 55,
+
+  "Icon": "Icons/Armor/LeatherBoots.png",
+  "Miniature2D": "Miniatures2D/Armor/LeatherBoots.png",
+
+  "IsStackable": false,
+  "MaxStackSize": 1,
+
+  "Equipable": {
+    "EquipmentCategory": "Boots",
+    "LevelRequired": 1,
+    "Effects": []
+  },
+
+  "Durable": {
+    "MaxDurability": 500,
+    "IsIndestructible": false
+  },
+
+  "Armor": {
+    "MaxDefence": 10
+  }
+}

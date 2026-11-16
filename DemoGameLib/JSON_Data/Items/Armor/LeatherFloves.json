@@ -1,0 +1,30 @@
+{
+  "Category": "Armor",
+
+  "Id": 703,
+  "Name": "Leather Gloves",
+  "Description": "Reinforced leather gloves.",
+  "Weight": 0.8,
+  "Price": 45,
+
+  "Icon": "Icons/Armor/LeatherGloves.png",
+  "Miniature2D": "Miniatures2D/Armor/LeatherGloves.png",
+
+  "IsStackable": false,
+  "MaxStackSize": 1,
+
+  "Equipable": {
+    "EquipmentCategory": "Gloves",
+    "LevelRequired": 1,
+    "Effects": []
+  },
+
+  "Durable": {
+    "MaxDurability": 400,
+    "IsIndestructible": false
+  },
+
+  "Armor": {
+    "MaxDefence": 8
+  }
+}
