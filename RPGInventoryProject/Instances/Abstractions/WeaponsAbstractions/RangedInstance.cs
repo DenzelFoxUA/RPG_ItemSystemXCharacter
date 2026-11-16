@@ -3,34 +3,70 @@ using CharacterMainLib;
 
 namespace InventoryCoreLib
 {
-    public abstract class RangedInstance<Effect, TTarget> :
-        WeaponInstance<Effect, TTarget>, IRanged
-        where Effect : class, IAffectImmediately<TTarget>
-        where TTarget : class, IAffectableCharacter
+    public class RangedInstance :
+        WeaponInstance<IAffect, IAffectable>, IRanged
     {
 
         public RangedWeapon RangedWeapon => (RangedWeapon)Definition!;
 
-        //public IAmmoInstance? CurrentAmmoInstance { get; protected set; }
+        public AmmoInstance? CurrentAmmoInstance { get; protected set; }
 
-        public uint CurrentAmmoCount { get; protected set; } = 0;
+        public uint CurrentAmmoCount => CurrentAmmoInstance!.CurrentStackCount;
 
         public RangedInstance(RangedWeapon _weapon,
-            params IAffectImmediately<IAffectableCharacter>[]? effects) :
+            params IAffect[] effects) :
             base(_weapon)
         {
 
         }
 
-        public abstract bool Reload();
+        public virtual void Reload()
+        {
+
+        }
 
         //public abstract bool CanUseAmmo(IAmmoInstance ammo);
 
-        //public abstract bool SetAmmo(IAmmoInstance ammo);
+        public virtual AmmoInstance? SetAmmo(AmmoInstance? ammo)
+        {
+            if (ammo is null)
+                return null;
+            if(CurrentAmmoInstance is not null)
+            {
+                (CurrentAmmoInstance, ammo) = (ammo, CurrentAmmoInstance);
+            }
+            else
+            {
+                CurrentAmmoInstance = ammo;
+                ammo = null;
+            }
+
+            return ammo;
+        }
 
         public virtual void ClearAmmo()
         {
 
+        }
+
+        public override void Use()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void Equip()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void Unequip()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void SetTargetFunction()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
