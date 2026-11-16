@@ -7,7 +7,8 @@ using System.Numerics;
 namespace InventoryCoreLib
 {
     public class BuffAttributeEffect
-        : BaseEffect<IAffectableCharacter, uint>
+        : BaseEffect<IAffectableCharacter, uint>, 
+        IAffectConditionally<IAffectableCharacter>
     {
         private string _attributeName;
 

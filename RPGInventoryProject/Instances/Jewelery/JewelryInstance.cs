@@ -53,7 +53,6 @@ namespace InventoryCoreLib
             {
                 if(effect is IAffectConditionally<IAffectableCharacter> eff)
                 {
-                    //eff.SetTarget(MyOwner);
                     eff.Remove();
                 }
             }

@@ -1,12 +1,24 @@
-﻿namespace DemoGameLib
+﻿using InventoryCoreLib;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace DemoGameLib
 {
-    public class GameCore
+    public sealed record PickupEntry(string Name, Func<IOwnedUsable> Create)
     {
-        public ItemsCreator ItemsCreator { get; private init; }
-        
-        public GameCore()
-        {
-            ItemsCreator = new();
-        }
+        public override string ToString() => Name;
+    }
+
+    public static class GameCore
+    {
+        private static readonly ItemsCreator _itemsCreator = new();
+
+        public static IReadOnlyList<PickupEntry> Entries { get; } =
+        _itemsCreator
+            .GetAvailableItems()
+            .Select(item => new PickupEntry(
+                    item.Name, () => _itemsCreator.BuildItem(item.Id)))
+            .ToArray();
     }
 }

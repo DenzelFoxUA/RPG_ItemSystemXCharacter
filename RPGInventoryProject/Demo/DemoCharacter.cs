@@ -102,13 +102,9 @@ namespace InventoryCoreLib
             if (EquipmentSection is null)
                 throw new NullReferenceException("EQUIPMENT::NULL::ERR");
 
-
              Console.WriteLine(EquipmentSection.ShowEquipment());
-
              Console.WriteLine();
-
              Console.WriteLine(InventorySection.ShowInventory());
-
 
         }
 

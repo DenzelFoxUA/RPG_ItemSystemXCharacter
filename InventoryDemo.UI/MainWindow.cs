@@ -121,7 +121,7 @@ public sealed partial class MainWindow : Window
         LogHub.LineAdded += OnLogLineAdded;
         Closed += OnWindowClosed;
 
-        _pickupCombo.ItemsSource = SampleItemFactory.Entries;
+        _pickupCombo.ItemsSource = GameCore.Entries;
         _pickupCombo.SelectedIndex = 0;
 
         ConfigureDemo();

@@ -3,17 +3,11 @@ using InventoryCoreLib;
 
 namespace InventoryDemo.UI;
 
-public sealed record PickupEntry(string Name, Func<IOwnedUsable> Create)
-{
-    public override string ToString() => Name;
-}
+
 
 public static class SampleItemFactory
 {
-    private const string Icons = "Icons/";
-    private const string Miniatures = "Miniatures2D/";
-
-    private static readonly ItemsCreator _itemsCreator = new();
+    
 
     ////private static readonly PotionDefinition HealthPotionDefinition = new(
     ////    1, "Health Potion", "Restores 25 HP.", 25, 0.2, 20,
@@ -78,12 +72,5 @@ public static class SampleItemFactory
     //    return potion as StaminaPotion;
     //}
 
-    public static IReadOnlyList<PickupEntry> Entries { get; } =
-    _itemsCreator
-        .GetAvailableItems()
-        .Select(item =>
-            new PickupEntry(
-                item.Name,
-                () => _itemsCreator.BuildItem(item.Id)))
-        .ToArray();
+
 }

@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DemoGameLib
 {
@@ -15,7 +14,6 @@ namespace DemoGameLib
     {
         private readonly EffectsBuilder _effectsBuilder;
         private readonly JsonSerializerOptions _jsonOptions;
-
 
         #region [ DATA TRANSFER PACKETS ]
 
@@ -99,6 +97,7 @@ namespace DemoGameLib
         }
 
         #endregion
+
         // ====================== LOAD FILES ==================================
 
         private Dictionary<uint, ItemData> LoadItemsFromFiles()
@@ -427,9 +426,7 @@ namespace DemoGameLib
         {
             foreach (var item in ITEMS_LIB.Values)
             {
-                yield return (
-                    item.Id,
-                    item.Name);
+                yield return (item.Id,item.Name);
             }
         }
 
