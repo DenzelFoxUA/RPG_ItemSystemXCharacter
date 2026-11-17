@@ -1,0 +1,27 @@
+
+{
+  "Category": "Ammo",
+  "Type": "Ammo",
+
+  "Id": 302,
+  "Name": "Steel Arrow",
+  "Description": "A wooden arrow with a sharp steel tip. Designed for bows.",
+  "Weight": 0.05,
+  "Price": 2,
+
+  "Icon": "Icons/Ammo/SteelArrow.png",
+  "Miniature2D": "Miniatures2D/Ammo/SteelArrow.png",
+
+  "IsStackable": true,
+  "MaxStackSize": 50,
+
+  "Equipable": {
+    "EquipmentCategory": "Ammo",
+    "LevelRequired": 1,
+    "Effects": []
+  },
+
+  "Ammo": {
+    "AmmoType": "Arrow"
+  }
+}

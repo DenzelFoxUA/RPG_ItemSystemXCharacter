@@ -2,10 +2,8 @@
 
 namespace InventoryCoreLib
 {
-    public interface IAmmo : IOwnedEquipable
+    public interface IAmmo : IOwnedEquipable, IStackable
     {
-        public uint CurrentStackCount { get; }
         public string GetAmmoType();
-        public void UseOne();
     }
 }

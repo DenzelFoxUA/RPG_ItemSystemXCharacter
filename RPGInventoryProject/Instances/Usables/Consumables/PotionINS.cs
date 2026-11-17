@@ -1,14 +1,11 @@
 ﻿
 using CharacterMainLib;
 using System;
-using System.Linq;
-using System.Collections.Generic;
 
 namespace InventoryCoreLib
 {
     public class PotionINS :
-         UsableItemInstance<IAffect, 
-            IAffectableCharacter>
+         UsableItemInstance<IAffect, IAffectableCharacter>
     {
 
         private Action<IOwnedUsable>? _useFunction = null;

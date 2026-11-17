@@ -12,6 +12,8 @@ namespace InventoryCoreLib
         private IDemoCharacter _owner;
         public IDemoCharacter Owner { get => _owner; }
 
+        public double CurrentCarryWeight { get; private set; }
+
         private void ValidatePosition(Position pos)
         {
             if (pos.Row < 0 || pos.Row >= InventoryGrid.Rows ||
@@ -38,6 +40,16 @@ namespace InventoryCoreLib
         {
             if (item is null)
                 return null;
+
+            if(!HasSpace())
+            {
+                throw new InventoryOperationException("Can't add item. Out of space.");
+            }
+
+            if(!CanCarry(item.GetWeight()))
+            {
+                throw new InventoryOperationException("Can't add item. Overweight");
+            }
 
             ValidatePosition(pos);
 
@@ -82,6 +94,16 @@ namespace InventoryCoreLib
         {
             if (item is null)
                 throw new ArgumentNullException("Cant add item - it is null");
+
+            if (!HasSpace())
+            {
+                throw new InventoryOperationException("Can't add item. Out of space.");
+            }
+
+            if (!CanCarry(item.GetWeight()))
+            {
+                throw new InventoryOperationException("Can't add item. Overweight");
+            }
 
             // Спочатку намагаємося об'єднати стеки
             if (item is IStackable _itStackable)
@@ -265,5 +287,48 @@ namespace InventoryCoreLib
         }
 
         #endregion
+
+        public void Update()
+        {
+            UpdateWeight();
+        }
+
+        private void UpdateWeight()
+        {
+            double totalWeight = 0;
+
+            foreach (var item in Container)
+            {
+                if (item is null)
+                {
+                    continue;
+                }
+
+                totalWeight += item.GetWeight();
+            }
+
+            CurrentCarryWeight = totalWeight;
+        }
+
+        private bool HasSpace()
+        {
+            foreach(var cell in Container)
+            {
+                if (cell is null)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private bool CanCarry(double itemWeight)
+        {
+            if(CurrentCarryWeight + itemWeight <= Owner.GetMaxCarryWeight())
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }

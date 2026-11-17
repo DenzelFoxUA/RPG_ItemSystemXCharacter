@@ -12,14 +12,14 @@ namespace InventoryCoreLib
         where TEffect : class, IAffect
     {
 
-        private EquipableItem Item 
+        private EquipableItem Item
         {
             get
             {
                 if (Definition is null)
                     throw new ObjectNotInitializedException(nameof(Definition));
-                else 
-                  return (EquipableItem)Definition;
+                else
+                    return (EquipableItem)Definition;
             }
         }
 
@@ -31,7 +31,7 @@ namespace InventoryCoreLib
 
         protected TTarget? _target;
 
-        public  IDemoCharacter? MyOwner { get => _owner; }
+        public IDemoCharacter? MyOwner { get => _owner; }
 
         public TTarget? MyTarget => _target;
         IAffectable? IOwnedUsable.MyTarget => MyTarget;
@@ -40,7 +40,7 @@ namespace InventoryCoreLib
 
         #region [ CTOR ]
 
-        protected EquipableInstance(BaseItem definition, params TEffect[]? effects) 
+        protected EquipableInstance(BaseItem definition, params TEffect[]? effects)
             : base(definition)
         {
             Effects = Array.AsReadOnly(effects?.ToArray() ??
@@ -112,7 +112,7 @@ namespace InventoryCoreLib
 
         public virtual void SetMyTarget(IAffectable? target)
         {
-            if(target is null) return;
+            if (target is null) return;
 
             if (target is TTarget _character)
             {
@@ -186,6 +186,16 @@ namespace InventoryCoreLib
         public bool IsItemEquipped()
         {
             return IsEquipped;
+        }
+
+        public double GetWeight()
+        {
+            if(Definition is null)
+            {
+                throw new ObjectNotInitializedException(nameof(Definition));
+            }
+
+            return Definition.Weight;
         }
     }
 }

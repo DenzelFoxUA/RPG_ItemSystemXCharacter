@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -10,7 +13,6 @@ using CharacterMainLib;
 using DemoGameLib;
 using InventoryCoreLib;
 
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,7 +20,7 @@ namespace InventoryDemo.UI;
 
 public sealed partial class MainWindow : Window
 {
-    //game loop
+    // Model update runs every second. UI refresh never performs game actions.
     private CancellationTokenSource? _gameLoopCts;
     private Task? _gameLoopTask;
 
@@ -26,17 +28,37 @@ public sealed partial class MainWindow : Window
     {
         const float deltaTime = 1.0f;
 
-        while (!token.IsCancellationRequested)
+        try
         {
-            RefreshAll(deltaTime);
+            while (true)
+            {
+                // Wait first: startup refresh has already been done in constructor.
+                await Task.Delay(TimeSpan.FromSeconds(1), token);
 
-            await Task.Delay(1000, token);
+                // The optional scenario has its own simulation clock.
+                // Avoid updating effects twice while it is running.
+                if (_scenarioCancellation is null)
+                {
+                    _character.Update(deltaTime);
+                    _currentFoe.Actor.Update(deltaTime);
+                }
+
+                // Reuse UI controls; update text and changed items only.
+                RefreshCurrentState();
+            }
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+            // Expected when the window closes.
         }
     }
 
     protected override void OnOpened(EventArgs e)
     {
         base.OnOpened(e);
+
+        if (_gameLoopCts is not null)
+            return;
 
         _gameLoopCts = new CancellationTokenSource();
         _gameLoopTask = GameLoop(_gameLoopCts.Token);
@@ -67,6 +89,20 @@ public sealed partial class MainWindow : Window
     private readonly Canvas _equipmentCanvas = new() { Width = 430, Height = 365 };
     private readonly ComboBox _pickupCombo = new();
 
+    // Persistent inventory/equipment controls. They are not replaced every tick.
+    private bool _inventoryLayoutCreated;
+    private bool _equipmentLayoutCreated;
+
+    private readonly Dictionary<(ushort Row, ushort Col), Border> _inventoryCells = new();
+    private readonly Dictionary<(ushort Row, ushort Col), IOwnedUsable?> _visibleInventoryItems = new();
+    private readonly Dictionary<(ushort Row, ushort Col), (Border Host, TextBlock Label)> _inventoryBadges = new();
+    private readonly Dictionary<(ushort Row, ushort Col), TextBlock> _inventoryTooltipInfos = new();
+
+    private readonly Dictionary<string, Border> _equipmentSlots = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, IOwnedEquipable?> _visibleEquipmentItems = new(StringComparer.Ordinal);
+    private (Border Host, TextBlock Label)? _ammoBadge;
+    private TextBlock? _ammoTooltipInfo;
+
     private readonly TextBlock _foeName = new();
     private readonly TextBlock _foeStatus = new();
     private readonly Image _foeImage = new();
@@ -91,11 +127,16 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         Title = "RPG Inventory Demo";
-        Width = DesignWidth;
-        Height = DesignHeight;
-        MinWidth = 1200;
-        MinHeight = 750;
+        Width = 1280;
+        Height = 720;
+
+        MinWidth = 1000;
+        MinHeight = 650;
+
+        WindowState = WindowState.Normal;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
+
+        CanResize = false;
         Background = DarkBrown;
 
         _character = CreateCharacter();
@@ -509,19 +550,25 @@ public sealed partial class MainWindow : Window
 
     #region Refresh
 
+    // A presentation-only refresh. In particular it MUST NOT call
+    // character.Update() or any weapon attack method.
+    // The parameter is kept so existing partial-class callers still compile.
     private void RefreshAll(float dTime)
     {
-        // Recalculate equipment-derived attack/defence without advancing timers.
-        _character.Update(dTime);
-        _currentFoe.Actor.Update(dTime);
-
         RefreshFoe();
         RefreshPlayerAvatar();
+        RefreshCurrentState();
+    }
+
+    // Safe to run every second while a tooltip is open.
+    private void RefreshCurrentState()
+    {
+        _foeStatus.Text = _currentFoe.StatusText?.Invoke() ?? string.Empty;
         RefreshVitals();
         RefreshStats();
+        RefreshCombatValues();
         RefreshEquipment();
         RefreshInventory();
-        RefreshCombatValues();
     }
 
     private void RefreshFoe()
@@ -561,35 +608,20 @@ public sealed partial class MainWindow : Window
     {
         _defenceText.Text = _character.Equipment.Defence.ToString();
 
-        uint attack = 0;
-        if (_character.Equipment.ItemAtSlot("Weapon") is ICanDealDamage weapon)
+        // Read the weapon DEFINITION, never invoke PrimaryAttack here!
+        // PrimaryAttack may spend ammo / durability even when no button was pressed.
+        uint maxDamage = 0;
+        if (_character.Equipment.ItemAtSlot("Weapon") is IOwnedEquipable equippedWeapon &&
+            GetDefinition(equippedWeapon) is BaseWeapon definition)
         {
-            if (weapon.PrimaryAttack(_currentFoe.Actor) is null)
-                attack = 0;
-            else
-            {
-                try
-                {
-                    attack = weapon.PrimaryAttack(_currentFoe.Actor).Damage;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                    attack = 0;
-                }
-            }
-            
+            maxDamage = definition.PrimaryAttack.MaxDamage;
         }
 
-        _attackText.Text = attack.ToString();
+        _attackText.Text = maxDamage.ToString();
     }
 
     private void RefreshInventory()
     {
-        _inventoryCanvas.Children.Clear();
-        var frame = CreateImage("UserInterfaceElements/InventoryFrame.png", Stretch.Fill);
-        Place(_inventoryCanvas, frame, 0, 0, 705, 415);
-
         const double startX = 77;
         const double startY = 83;
         const double cellW = 91;
@@ -597,162 +629,287 @@ public sealed partial class MainWindow : Window
         const double stepX = 93;
         const double stepY = 75;
 
+        if (!_inventoryLayoutCreated)
+        {
+            _inventoryCanvas.Children.Clear();
+            var frame = CreateImage("UserInterfaceElements/InventoryFrame.png", Stretch.Fill);
+            Place(_inventoryCanvas, frame, 0, 0, 705, 415);
+
+            for (ushort row = 0; row < 4; row++)
+            {
+                for (ushort col = 0; col < 6; col++)
+                {
+                    var pos = new Position(row, col);
+                    Border cell = CreateInventoryCell(pos, null);
+                    var key = (row, col);
+                    _inventoryCells.Add(key, cell);
+
+                    Place(_inventoryCanvas, cell,
+                        startX + col * stepX,
+                        startY + row * stepY,
+                        cellW,
+                        cellH);
+                }
+            }
+
+            _inventoryLayoutCreated = true;
+        }
+
+        // Same item reference -> same Border, icon, context menu and tooltip.
+        // Only the count badge changes as the stack is consumed.
         for (ushort row = 0; row < 4; row++)
         {
             for (ushort col = 0; col < 6; col++)
             {
+                var key = (row, col);
                 var pos = new Position(row, col);
                 IOwnedUsable? item = _character.Inventory.ItemAt(pos);
-                Border cell = CreateInventoryCell(pos, item);
-                Place(_inventoryCanvas, cell,
-                    startX + col * stepX,
-                    startY + row * stepY,
-                    cellW,
-                    cellH);
+                Border cell = _inventoryCells[key];
+
+                if (!_visibleInventoryItems.TryGetValue(key, out var previous) ||
+                    !ReferenceEquals(previous, item))
+                {
+                    _visibleInventoryItems[key] = item;
+                    _inventoryBadges.Remove(key);
+                    cell.Child = CreateInventoryItemContent(item, out var badgeHost, out var badgeLabel);
+
+                    if (badgeHost is not null && badgeLabel is not null)
+                        _inventoryBadges[key] = (badgeHost, badgeLabel);
+
+                    if (item is null)
+                    {
+                        ToolTip.SetTip(cell, null);
+                        _inventoryTooltipInfos.Remove(key);
+                        cell.ContextMenu = null;
+                    }
+                    else
+                    {
+                        ToolTip.SetTip(cell, CreateItemToolTip(item, out var infoLabel));
+                        _inventoryTooltipInfos[key] = infoLabel;
+                        cell.ContextMenu = BuildInventoryContextMenu(pos, item);
+                    }
+                }
+
+                if (item is IStackable stackable &&
+                    _inventoryBadges.TryGetValue(key, out var badge))
+                {
+                    badge.Label.Text = stackable.CurrentStackCount.ToString();
+                    badge.Host.IsVisible = stackable.CurrentStackCount > 1;
+                }
+
+                if (item is not null && _inventoryTooltipInfos.TryGetValue(key, out var info))
+                    UpdateItemTooltipInfo(info, item);
             }
         }
     }
 
     private Border CreateInventoryCell(Position pos, IOwnedUsable? item)
     {
-        bool selected = _selectedPosition is Position _selected &&
-                        _selected.Row == pos.Row && _selected.Column == pos.Column;
+        bool selected = _selectedPosition is Position current &&
+                        current.Row == pos.Row && current.Column == pos.Column;
 
+        // The cell itself is created once; its content is replaced only if
+        // the item instance occupying this position actually changes.
         var cell = new Border
         {
             Background = Brushes.Transparent,
             BorderBrush = selected ? Brushes.White : Brushes.Transparent,
             BorderThickness = selected ? new Thickness(2) : new Thickness(0),
             Padding = new Thickness(4),
-            Child = CreateInventoryItemContent(item)
+            Child = new Border { Background = Brushes.Transparent }
         };
 
         cell.PointerPressed += (_, _) => SelectInventoryCell(pos, cell);
         cell.DoubleTapped += (_, _) => UseInventoryItem(pos, "Double-click");
-
-        if (item is not null)
-        {
-            var toolTip = new ToolTip
-            {
-                Width = 430,
-                Height = 430,
-
-                MinWidth = 430,
-                MinHeight = 430,
-                MaxWidth = 430,
-                MaxHeight = 430,
-
-                Padding = new Thickness(0),
-                Background = Brushes.Transparent,
-                BorderThickness = new Thickness(0),
-
-                Content = CreateItemInfoToolTip(item)
-            };
-
-            ToolTip.SetTip(cell, toolTip);
-            cell.ContextMenu = BuildInventoryContextMenu(pos, item);
-        }
-
         return cell;
     }
 
+    // Keep the original one-argument signature for partial-class compatibility.
     private Control CreateInventoryItemContent(IOwnedUsable? item)
+        => CreateInventoryItemContent(item, out _, out _);
+
+    private Control CreateInventoryItemContent(
+        IOwnedUsable? item, out Border? badgeHost, out TextBlock? badgeLabel)
     {
+        badgeHost = null;
+        badgeLabel = null;
         if (item is null)
             return new Border { Background = Brushes.Transparent };
 
         var grid = new Grid();
         BaseItem? definition = GetDefinition(item);
-        var icon = CreateImage(definition?.Icon, Stretch.Uniform);
-        grid.Children.Add(icon);
+        grid.Children.Add(CreateImage(definition?.Icon, Stretch.Uniform));
 
-        if (item is IStackable stackable && stackable.CurrentStackCount > 1)
+        if (item is IStackable stackable)
         {
-            grid.Children.Add(new Border
-            {
-                Background = new SolidColorBrush(Color.FromArgb(185, 0, 0, 0)),
-                HorizontalAlignment = HorizontalAlignment.Right,
-                VerticalAlignment = VerticalAlignment.Bottom,
-                Padding = new Thickness(5, 1),
-                Child = new TextBlock
-                {
-                    Text = stackable.CurrentStackCount.ToString(),
-                    Foreground = Brushes.White,
-                    FontSize = 14,
-                    FontWeight = FontWeight.Bold
-                }
-            });
+            (badgeHost, badgeLabel) = CreateStackBadge();
+            badgeLabel.Text = stackable.CurrentStackCount.ToString();
+            badgeHost.IsVisible = stackable.CurrentStackCount > 1;
+            grid.Children.Add(badgeHost);
         }
 
         return grid;
+    }
+
+    private static (Border Host, TextBlock Label) CreateStackBadge()
+    {
+        var label = new TextBlock
+        {
+            Foreground = Brushes.White,
+            FontSize = 14,
+            FontWeight = FontWeight.Bold
+        };
+
+        var host = new Border
+        {
+            Background = new SolidColorBrush(Color.FromArgb(185, 0, 0, 0)),
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            Padding = new Thickness(5, 1),
+            Child = label
+        };
+
+        return (host, label);
+    }
+
+    private ToolTip CreateItemToolTip(IOwnedUsable item)
+        => CreateItemToolTip(item, out _);
+
+    private ToolTip CreateItemToolTip(IOwnedUsable item, out TextBlock infoLabel)
+    {
+        Control content = CreateItemInfoToolTip(item, out infoLabel);
+        return new ToolTip
+        {
+            Width = 430,
+            Height = 430,
+            MinWidth = 430,
+            MinHeight = 430,
+            MaxWidth = 430,
+            MaxHeight = 430,
+            Padding = new Thickness(0),
+            Background = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Content = content
+        };
     }
 
     #region [ CANVAS ]
 
     private void RefreshEquipment()
     {
-        _equipmentCanvas.Children.Clear();
-        var panel = CreateImage("UserInterfaceElements/EquipmentPanel.png", Stretch.Fill);
-        Place(_equipmentCanvas, panel, 0, 0, 430, 336);
+        if (!_equipmentLayoutCreated)
+        {
+            _equipmentCanvas.Children.Clear();
+            var panel = CreateImage("UserInterfaceElements/EquipmentPanel.png", Stretch.Fill);
+            Place(_equipmentCanvas, panel, 0, 0, 430, 336);
 
-        AddEquipmentSlot("Head", 9, 26, 79, 92);
-        AddEquipmentSlot("Gloves", 9, 120, 79, 90);
-        AddEquipmentSlot("Boots", 9, 210, 79, 98);
+            // Original positioning, including Ammo beneath the weapon.
+            AddEquipmentSlot("Head", 9, 26, 79, 92);
+            AddEquipmentSlot("Gloves", 9, 120, 79, 90);
+            AddEquipmentSlot("Boots", 9, 210, 79, 98);
+            AddEquipmentSlot("Weapon", 96, 26, 77, 215);
+            AddEquipmentSlot("Ammo", 96, 240, 76, 88);
+            AddEquipmentSlot("Body", 176, 26, 106, 223);
+            AddEquipmentSlot("Shield", 284, 26, 78, 214);
+            AddEquipmentSlot("Amulet", 367, 72, 54, 74);
+            AddEquipmentSlot("Ring", 367, 145, 54, 73);
 
-        AddEquipmentSlot("Weapon", 96, 26, 77, 215);
-        AddEquipmentSlot("Ammo", 96, 250, 76, 88);
+            _equipmentLayoutCreated = true;
+        }
 
-        AddEquipmentSlot("Body", 176, 26, 106, 223);
-        AddEquipmentSlot("Shield", 284, 26, 78, 214);
+        foreach (var slot in _equipmentSlots)
+        {
+            string slotName = slot.Key;
+            Border border = slot.Value;
+            IOwnedEquipable? item = _character.Equipment.ItemAtSlot(slotName);
 
-        AddEquipmentSlot("Amulet", 367, 72, 54, 74);
-        AddEquipmentSlot("Ring", 367, 155, 54, 73);
+            if (!_visibleEquipmentItems.TryGetValue(slotName, out var previous) ||
+                !ReferenceEquals(previous, item))
+            {
+                _visibleEquipmentItems[slotName] = item;
+                if (slotName == "Ammo")
+                {
+                    _ammoBadge = null;
+                    _ammoTooltipInfo = null;
+                }
+
+                border.Child = CreateEquipmentItemContent(
+                    item, slotName == "Ammo", out var badgeHost, out var badgeLabel);
+
+                if (slotName == "Ammo" && badgeHost is not null && badgeLabel is not null)
+                    _ammoBadge = (badgeHost, badgeLabel);
+
+                if (item is null)
+                {
+                    ToolTip.SetTip(border, null);
+                }
+                else
+                {
+                    ToolTip.SetTip(border, CreateItemToolTip(item, out var infoLabel));
+                    if (slotName == "Ammo")
+                        _ammoTooltipInfo = infoLabel;
+                }
+            }
+
+            if (slotName == "Ammo" && item is not null && _ammoTooltipInfo is not null)
+                UpdateItemTooltipInfo(_ammoTooltipInfo, item);
+
+            // Update the ammo counter in place; do not destroy an open tooltip.
+            if (slotName == "Ammo" && _ammoBadge is { } badge && item is IStackable stackable)
+            {
+                badge.Label.Text = stackable.CurrentStackCount.ToString();
+                badge.Host.IsVisible = true; // Also show 1 remaining arrow/bolt.
+            }
+        }
     }
 
     private void AddEquipmentSlot(string slotName, double x, double y, double width, double height)
     {
-        IOwnedEquipable? item = _character.Equipment.ItemAtSlot(slotName);
-
         var border = new Border
         {
             Background = Brushes.Transparent,
             Padding = new Thickness(2),
-            Child = CreateEquipmentItemContent(item)
+            Child = new Border { Background = Brushes.Transparent }
         };
 
-        if (item is not null)
+        // Read the currently equipped item when clicked; never capture an old one.
+        border.DoubleTapped += (_, _) =>
         {
-            var toolTip = new ToolTip
-            {
-                Width = 430,
-                Height = 430,
+            if (_character.Equipment.ItemAtSlot(slotName) is IOwnedEquipable equipped)
+                UseEquippedItem(slotName, equipped);
+        };
 
-                MinWidth = 430,
-                MinHeight = 430,
-                MaxWidth = 430,
-                MaxHeight = 430,
-
-                Padding = new Thickness(0),
-                Background = Brushes.Transparent,
-                BorderThickness = new Thickness(0),
-
-                Content = CreateItemInfoToolTip(item)
-            };
-
-            ToolTip.SetTip(border, toolTip);
-            border.DoubleTapped += (_, _) => UseEquippedItem(slotName, item);
-        }
-
+        _equipmentSlots.Add(slotName, border);
         Place(_equipmentCanvas, border, x, y, width, height);
     }
 
     private Control CreateEquipmentItemContent(IOwnedEquipable? item)
+        => CreateEquipmentItemContent(item, false, out _, out _);
+
+    private Control CreateEquipmentItemContent(
+        IOwnedEquipable? item,
+        bool isAmmoSlot,
+        out Border? badgeHost,
+        out TextBlock? badgeLabel)
     {
+        badgeHost = null;
+        badgeLabel = null;
         if (item is null)
             return new Border { Background = Brushes.Transparent };
 
+        var grid = new Grid();
         BaseItem? definition = GetDefinition(item);
-        return CreateImage(definition?.Miniature2D, Stretch.Uniform);
+        grid.Children.Add(CreateImage(definition?.Miniature2D, Stretch.Uniform));
+
+        if (isAmmoSlot && item is IStackable stackable)
+        {
+            (badgeHost, badgeLabel) = CreateStackBadge();
+            badgeLabel.Text = stackable.CurrentStackCount.ToString();
+            badgeHost.IsVisible = true;
+            grid.Children.Add(badgeHost);
+        }
+
+        return grid;
     }
 
     #endregion
@@ -862,6 +1019,9 @@ public sealed partial class MainWindow : Window
     }
 
     private Control CreateItemInfoToolTip(IOwnedUsable item)
+        => CreateItemInfoToolTip(item, out _);
+
+    private Control CreateItemInfoToolTip(IOwnedUsable item, out TextBlock infoLabel)
     {
         const double width = 430;
         const double height = 430;
@@ -932,17 +1092,9 @@ public sealed partial class MainWindow : Window
         // BASIC INFO
         // ============================================================
 
-        string stack =
-            item is IStackable stackable
-                ? stackable.CurrentStackCount.ToString()
-                : "1";
-
         var info = new TextBlock
         {
-            Text =
-                $"Weight: {definition?.Weight:0.##}\n" +
-                $"Price: {definition?.Price}\n" +
-                $"Stack: {stack}",
+            Text = BuildItemTooltipInfo(item),
 
             Foreground = ParchmentText,
 
@@ -953,11 +1105,13 @@ public sealed partial class MainWindow : Window
         };
 
         Place(
-            canvas,info,
+            canvas, info,
             180,
             145,
             190,
             90);
+
+        infoLabel = info;
 
 
         // ============================================================
@@ -980,9 +1134,28 @@ public sealed partial class MainWindow : Window
             TextAlignment = TextAlignment.Left
         };
 
-        Place(canvas,description,52,275,325,90);
+        Place(canvas, description, 52, 275, 325, 90);
 
         return canvas;
+    }
+
+    private static string BuildItemTooltipInfo(IOwnedUsable item)
+    {
+        BaseItem? definition = GetDefinition(item);
+        string stack = item is IStackable stackable
+            ? stackable.CurrentStackCount.ToString()
+            : "1";
+
+        return $"Weight: {definition?.Weight:0.##}\n" +
+               $"Price: {definition?.Price}\n" +
+               $"Stack: {stack}";
+    }
+
+    private static void UpdateItemTooltipInfo(TextBlock label, IOwnedUsable item)
+    {
+        string current = BuildItemTooltipInfo(item);
+        if (!string.Equals(label.Text, current, StringComparison.Ordinal))
+            label.Text = current;
     }
 
     private static BaseItem? GetDefinition(IOwnedUsable item)
@@ -1059,7 +1232,6 @@ public sealed partial class MainWindow : Window
     {
         var stopwatch = Stopwatch.StartNew();
         double previous = stopwatch.Elapsed.TotalSeconds;
-        double uiAccumulator = 0;
 
         try
         {
@@ -1074,13 +1246,6 @@ public sealed partial class MainWindow : Window
                 _character.Update(deltaTime);
                 _currentFoe.UpdateAction?.Invoke(deltaTime);
                 CurrentScenarioUpdate(deltaTime);
-
-                uiAccumulator += deltaTime;
-                if (uiAccumulator >= 0.10)
-                {
-                    RefreshAll(0.0f);
-                    uiAccumulator = 0;
-                }
 
                 await Task.Delay(16, token);
             }

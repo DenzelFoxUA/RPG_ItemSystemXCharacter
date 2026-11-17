@@ -169,20 +169,22 @@ namespace InventoryCoreLib
                 return null;
             }
 
-            if(EquipmentSlots[slotName].ItemInstance is not null)
+            //коли закінчуються аммо то інстанс зникає
+            if(slotName == "Ammo" && 
+                EquipmentSlots[slotName].ItemInstance is IAmmo ammo)
+            {
+                if (ammo.CurrentStackCount == 0)
+                {
+                    EquipmentSlots[slotName].ItemInstance!.Unequip();
+                    EquipmentSlots[slotName].Unequip();
+                    return null;
+                }   
+            }
+
+            if (EquipmentSlots[slotName].ItemInstance is not null)
             {
                 EquipmentSlots[slotName].ItemInstance!.Unequip();
             }
-
-            ////коли закінчуються аммо то інстанс зникає
-            //if(slotName == "Ammo" && 
-            //    EquipmentSlots[slotName].ItemInstance is IAmmo ammo)
-            //{
-            //    if (ammo.CurrentStackCount == 0)
-            //    {
-            //        return null;
-            //    }   
-            //}
 
             return EquipmentSlots[slotName].Unequip();
         }
@@ -218,12 +220,12 @@ namespace InventoryCoreLib
                     }
                     else
                     {
-                        ranged.SetAmmo(null!);
+                        ranged.ClearAmmo();
                     }
                 }
                 else
                 {
-                    ranged.SetAmmo(null!);
+                    ranged.ClearAmmo();
                 }
 
             }
@@ -237,7 +239,11 @@ namespace InventoryCoreLib
                 throw new ObjectNotInitializedException(nameof(EquipmentSlots));
 
 
+            if (EquipmentSlots["Weapon"] is not null &&
+                EquipmentSlots["Ammo"] is not null)
+            {
                 UpdateRangedWeapon();
+            }
 
             foreach(var block in EquipmentSlots)
             {
@@ -255,6 +261,7 @@ namespace InventoryCoreLib
 
             _defencePoints = tottalDefence;
         }
+
         #endregion
 
         public override string ShowEquipment()

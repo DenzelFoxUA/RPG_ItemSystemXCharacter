@@ -1,0 +1,43 @@
+
+{
+  "Category": "Weapon",
+  "Type": "Ranged",
+
+  "Id": 202,
+  "Name": "Fine Bow",
+  "Description": "A finely crafted longbow made from flexible hardwood. Offers excellent accuracy and range.",
+  "Weight": 2.4,
+  "Price": 185,
+
+  "Icon": "Icons/Weapons/FineBow.png",
+  "Miniature2D": "Miniatures2D/Weapons/FineBow.png",
+
+  "IsStackable": false,
+  "MaxStackSize": 1,
+
+  "Equipable": {
+    "EquipmentCategory": "Weapon",
+    "LevelRequired": 2,
+    "Effects": []
+  },
+
+  "Durable": {
+    "MaxDurability": 750,
+    "IsIndestructible": false
+  },
+
+  "Weapon": {
+    "IsTwoHanded": true,
+
+    "PrimaryAttack": {
+      "MaxDamage": 24,
+      "AttackRange": 25.0
+    },
+
+    "SecondaryAttack": null
+  },
+
+  "Ammo": {
+    "AmmoType": "Arrow"
+  }
+}

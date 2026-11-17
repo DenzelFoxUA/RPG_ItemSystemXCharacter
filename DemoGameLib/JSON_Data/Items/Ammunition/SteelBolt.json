@@ -12,7 +12,7 @@
   "Miniature2D": "Miniatures2D/Ammo/SteelBolt.png",
 
   "IsStackable": true,
-  "MaxStackSize": 50,
+  "MaxStackSize": 10,
 
   "Equipable": {
     "EquipmentCategory": "Ammo",

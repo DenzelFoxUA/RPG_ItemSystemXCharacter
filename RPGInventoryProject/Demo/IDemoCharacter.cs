@@ -11,7 +11,7 @@ namespace InventoryCoreLib
         ICanUseEquipment<IOwnedEquipable>
     {
         public void UseConsumable(IOwnedUsable? consumable);
-
+        public double GetMaxCarryWeight();
         public void PickUpItem(IOwnedUsable? item);
     }
 }

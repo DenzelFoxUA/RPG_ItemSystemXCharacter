@@ -21,8 +21,6 @@ namespace InventoryCoreLib
 
         IReadOnlyList<IAffect>? IOwnedUsable.GetEffects() => Effects;
 
-        // ===================================================
-
         #region [ Owner - Target ]
 
         protected TTarget? _target;
@@ -34,8 +32,6 @@ namespace InventoryCoreLib
         IAffectable? IOwnedUsable.MyTarget => MyTarget;
 
         #endregion
-
-        //====================================================
 
         #region [ CTOR ]
 
@@ -115,7 +111,6 @@ namespace InventoryCoreLib
             return Definition.ToString() + "\n" + itemEff;
         }
 
-
         public string GetDefinitionName() => Item!.Name;
 
         #region [ OWNER_TARGET_SET ]
@@ -183,5 +178,14 @@ namespace InventoryCoreLib
 
         #endregion
 
+        public double GetWeight()
+        {
+            if (Definition is null)
+            {
+                throw new ObjectNotInitializedException(nameof(Definition));
+            }
+
+            return Definition.Weight;
+        }
     }
 }

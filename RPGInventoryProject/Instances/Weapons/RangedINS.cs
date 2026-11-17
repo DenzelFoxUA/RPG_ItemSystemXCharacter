@@ -1,6 +1,8 @@
 ﻿
 using CharacterMainLib;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace InventoryCoreLib
 {
@@ -9,8 +11,8 @@ namespace InventoryCoreLib
     {
 
         private Action<IOwnedEquipable>? _useFunction = null;
+
         private Func<string, IOwnedEquipable?>? _unequipFunction = null;
-        //private Action<IAmmo>? _clearAmmo = null;
 
         private RangedWeapon RangedWeapon => (RangedWeapon)Definition!;
 
@@ -70,7 +72,12 @@ namespace InventoryCoreLib
                 return;
 
             IsEquipped = false;
-            CurrentAmmoInstance!.Use();
+
+            if(CurrentAmmoInstance is not null)
+            {
+                CurrentAmmoInstance!.Use();
+            }
+            
             CancelMyTarget();
         }
 
@@ -100,9 +107,16 @@ namespace InventoryCoreLib
 
             var dist = Weapon.PrimaryAttack.AttackRange;
 
-            CurrentAmmoInstance.UseOne();
+            var completeEffects = Effects.ToList();
 
-            return new AttackComplex(CurrentPrimaryDamage, dist, Effects);
+            if (CurrentAmmoInstance is not null)
+            {
+                CurrentAmmoInstance.RemoveFromStack(1);
+
+                completeEffects = GetFullEffectsList();
+            }
+
+            return new AttackComplex(CurrentPrimaryDamage, dist, completeEffects);
         }
 
         public override AttackComplex? SecondaryAttack(IAffectable? target)
@@ -119,9 +133,16 @@ namespace InventoryCoreLib
 
             var dist = Weapon.PrimaryAttack.AttackRange;
 
-            CurrentAmmoInstance!.UseOne();
+            var completeEffects = Effects.ToList();
 
-            return new AttackComplex(CurrentSecondaryDamage, dist, Effects);
+            if (CurrentAmmoInstance is not null)
+            {
+                CurrentAmmoInstance.RemoveFromStack(1);
+
+                completeEffects = GetFullEffectsList();
+            }
+                
+            return new AttackComplex(CurrentSecondaryDamage, dist, completeEffects);
         }
 
         public override void SetMyTarget(IAffectable? target)
@@ -141,5 +162,21 @@ namespace InventoryCoreLib
         }
 
         public string GetAmmoType() => RangedWeapon.AmmoType;
+
+        protected List<IAffect> GetFullEffectsList()
+        {
+            var completeEffects = Effects.ToList();
+
+            if (CurrentAmmoInstance!.GetEffects() is not null)
+            {
+                foreach (var effect in CurrentAmmoInstance.GetEffects()!)
+                {
+                    completeEffects.Add(effect);
+                }
+            }
+
+            return completeEffects;
+        }
+
     }
 }

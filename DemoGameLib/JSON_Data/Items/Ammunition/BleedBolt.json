@@ -1,0 +1,35 @@
+
+{
+  "Category": "Ammo",
+  "Type": "Ammo",
+
+  "Id": 303,
+  "Name": "Bleed Bolt",
+  "Description": "A barbed crossbow bolt designed to cause severe bleeding. Inflicts damage over time.",
+  "Weight": 0.12,
+  "Price": 12,
+
+  "Icon": "Icons/Ammo/BleedBolt.png",
+  "Miniature2D": "Miniatures2D/Ammo/BleedBolt.png",
+
+  "IsStackable": true,
+  "MaxStackSize": 50,
+
+  "Equipable": {
+    "EquipmentCategory": "Ammo",
+    "LevelRequired": 3,
+
+    "Effects": [
+      {
+        "Type": "TempDrainHealth",
+        "Name": "Bleeding",
+        "Power": 3,
+        "Duration": 5.0
+      }
+    ]
+  },
+
+  "Ammo": {
+    "AmmoType": "Bolt"
+  }
+}

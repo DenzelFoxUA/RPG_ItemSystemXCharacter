@@ -56,7 +56,7 @@ namespace CharacterMainLib
     {
         public string Name { get; protected init; } = "";
 
-        CharacterBase BaseFeatures { get; }
+        public CharacterBase BaseFeatures { get; protected init; }
 
         public FrozenDictionary<string, VitalStat> VitalStats { get; protected set; }
         public FrozenDictionary<string, AttributeStat> AttributeStats { get; protected set; }

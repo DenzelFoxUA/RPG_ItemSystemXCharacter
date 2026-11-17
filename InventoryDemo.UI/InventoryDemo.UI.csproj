@@ -22,4 +22,8 @@
   <ItemGroup>
     <Content Include="Resources\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="MainWindow - Copy.cs" />
+  </ItemGroup>
 </Project>

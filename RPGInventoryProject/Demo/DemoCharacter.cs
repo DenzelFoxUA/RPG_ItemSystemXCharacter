@@ -1,15 +1,14 @@
-﻿
-using CharacterMainLib;
+﻿using CharacterMainLib;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace InventoryCoreLib
 {
     /// <summary>
     /// Demo-verison of a class using Grid as Inventory.
     /// </summary>
-    public class DemoCharacter : Character<IOwnedUsable, IOwnedEquipable>, IDemoCharacter
+    public class DemoCharacter : Character<IOwnedUsable, IOwnedEquipable>, 
+        IDemoCharacter
     {
 
         private DemoInventory? _myInventory = null;
@@ -17,7 +16,6 @@ namespace InventoryCoreLib
         private DemoEquipmentContainer? _myEquipment = null;
 
         private EffectsManager<IAffectableCharacter> _effectsManager;
-
 
         protected override IEquipmentHandler<IOwnedEquipable>? EquipmentSection => _myEquipment;
 
@@ -34,7 +32,6 @@ namespace InventoryCoreLib
                 "Equipment is not initialized.");
 
         #endregion
-
 
         #region [ CTOR ]
 
@@ -65,8 +62,19 @@ namespace InventoryCoreLib
             if (item is null || InventorySection is null)
                 return;
 
-            InventorySection.AddItem(item);
-
+            try
+            {
+                InventorySection.AddItem(item);
+            }
+            catch(InventoryOperationException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            
         }
 
         public void UseItem(Position itemPos, IAffectableActor? target)
@@ -78,7 +86,9 @@ namespace InventoryCoreLib
 
             if (_item is null || target is null) return;
 
-            if(_item is IStackable stackable && stackable.CurrentStackCount > 1)
+            if(_item is IStackable stackable 
+                && stackable.CurrentStackCount > 1 
+                && stackable is not IAmmo)
             {
                 stackable.RemoveFromStack(1);
                 UseItem(_item, target);
@@ -97,14 +107,18 @@ namespace InventoryCoreLib
         public void OpenInventory()
         {
             if (InventorySection is null)
-                throw new NullReferenceException("INVENTORY::NULL::ERR");
-
+            {
+                throw new ObjectNotInitializedException(nameof(InventorySection));
+            }
+                
             if (EquipmentSection is null)
-                throw new NullReferenceException("EQUIPMENT::NULL::ERR");
-
-             Console.WriteLine(EquipmentSection.ShowEquipment());
-             Console.WriteLine();
-             Console.WriteLine(InventorySection.ShowInventory());
+            {
+                throw new ObjectNotInitializedException(nameof(EquipmentSection));
+            }
+               
+            Console.WriteLine(EquipmentSection.ShowEquipment());
+            Console.WriteLine();
+            Console.WriteLine(InventorySection.ShowInventory());
 
         }
 
@@ -124,6 +138,11 @@ namespace InventoryCoreLib
 
             UpdateMovespeedByStats();
             UpdateVitalsByStats();
+        }
+
+        public void AddTemporaryEffect(IAffectTemporary<IAffectableCharacter>? effect)
+        {
+            _effectsManager.AddToTemporary(effect);
         }
 
         #region [ ATTACK ]
@@ -178,11 +197,6 @@ namespace InventoryCoreLib
             return null;
         }
 
-        public void AddTemporaryEffect(IAffectTemporary<IAffectableCharacter>? effect)
-        {
-            _effectsManager.AddToTemporary(effect);
-        }
-
         #endregion
 
         #region [ Equip ]
@@ -221,7 +235,7 @@ namespace InventoryCoreLib
 
         #endregion
 
-        #region [ Interfaces direct imlimentations ]
+        #region [ Interfaces direct implementations ]
 
         public IOwnedEquipable? DropItem(IOwnedEquipable item)
         {
@@ -275,22 +289,21 @@ namespace InventoryCoreLib
             }
         }
 
-
         #region [ UPDATE CHARACTER ]
 
         protected override void UpdateVitalsByStats()
         {
-            
+            //future logic
         }
 
         protected override void UpdateMovespeedByStats()
         {
-            
+            //future logic
         }
 
         #endregion
 
-        #region [ USE ITEMS ]
+        #region [ USE ITEMS PRIVATE ]
 
         private void UseItem(IOwnedUsable item, IAffectableActor target)
         {
@@ -332,10 +345,7 @@ namespace InventoryCoreLib
             Console.WriteLine("Consumable used!");
         }
 
-        #endregion
-
-        #region [ Equip ]
-
+        public double GetMaxCarryWeight() => BaseFeatures.MaxCarryWeight;
 
         #endregion
 

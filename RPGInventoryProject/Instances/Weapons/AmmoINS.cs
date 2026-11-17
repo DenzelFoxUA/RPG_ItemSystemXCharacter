@@ -44,7 +44,6 @@ namespace InventoryCoreLib
 
         public EquipableItem? GetDefinition() => Definition as AmmoDefinition;
 
-
         public override void Equip()
         {
             if (IsEquipped)
@@ -65,8 +64,8 @@ namespace InventoryCoreLib
 
         public override void Update()
         {
-            //if (CurrentStackCount == 0)
-            //    _clearFunction!.Invoke(this.GetEquipSlotCategory());
+            if (CurrentStackCount == 0)
+                _clearFunction!.Invoke(this.GetEquipSlotCategory());
         }
 
         public override void SetMyTarget(IAffectable? target)
@@ -82,10 +81,49 @@ namespace InventoryCoreLib
             return Ammo.AmmoType;
         }
 
-        public void UseOne()
+
+        #region [ STACK OPERATIONS ]
+
+        public virtual uint AddToStack(uint count)
         {
-            _currentStackCount--;
-         
+            if (Definition is null)
+                throw new NullReferenceException("Definition of item not set");
+
+            if (!Definition.IsStackable)
+                return count;
+
+            if (CurrentStackCount >= Definition.MaxStackSize)
+            {
+                return count;
+            }
+            else if (count >= Definition.MaxStackSize - CurrentStackCount)
+            {
+                uint difference = Definition.MaxStackSize - CurrentStackCount;
+                _currentStackCount = Definition.MaxStackSize;
+                return count - difference;
+            }
+            else
+            {
+                _currentStackCount += count;
+                return 0;
+            }
         }
+
+        public virtual uint RemoveFromStack(uint count)
+        {
+            if (Definition is null)
+                throw new NullReferenceException("Definition of item not set");
+
+            if (!Definition.IsStackable)
+                return 0;
+
+            uint toRemove = Math.Min(count, CurrentStackCount);
+
+            _currentStackCount -= toRemove;
+
+            return count - toRemove;
+        }
+
+        #endregion
     }
 }

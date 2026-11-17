@@ -12,6 +12,7 @@ namespace InventoryCoreLib
         public void SetMyTarget(IAffectable? target);
 
         public IReadOnlyList<IAffect>? GetEffects();
+        public double GetWeight();
  
     }
 }
