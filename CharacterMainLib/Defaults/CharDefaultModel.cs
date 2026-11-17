@@ -35,7 +35,8 @@ namespace CharacterMainLib
                 "Ring",
                 "Amulet",
                 "Weapon",
-                "Shield"
+                "Shield",
+                "Ammo"
             ];
 
     }

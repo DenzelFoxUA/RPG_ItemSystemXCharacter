@@ -219,12 +219,11 @@ namespace InventoryCoreLib
             return null;
         }
 
-        public void LoadAmmo(AmmoInstance? ammo)
+        public void LoadAmmo(IAmmo ammo)
         {
             if (EquipmentSection!.GetInstanse("Weapon") is IRanged ranged)
             {
-                
-                ranged.SetAmmo(ammo);
+                ranged.LoadAmmo(ammo);
             }
         }
 

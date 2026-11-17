@@ -1,18 +1,17 @@
 ﻿
+
 using CharacterMainLib;
 
 namespace InventoryCoreLib
 {
-    public class BodyArmorInstance :
-        ArmorInstance<IAffect,IAffectableCharacter>
+    public class BootsINS :
+        ArmorInstance<IAffect,
+            IAffectableCharacter>
     {
-
-        public BodyArmorInstance(in ArmorDefinition armor, 
+        public BootsINS(BaseArmor armor, 
             params IAffect[] effects) 
             : base(armor, effects)
         {
-           
         }
-
     }
 }

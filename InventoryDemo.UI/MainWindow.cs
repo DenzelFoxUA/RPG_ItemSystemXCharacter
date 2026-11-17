@@ -64,7 +64,7 @@ public sealed partial class MainWindow : Window
 
     private readonly TextBox _consoleBox = new();
     private readonly Canvas _inventoryCanvas = new() { Width = 705, Height = 415 };
-    private readonly Canvas _equipmentCanvas = new() { Width = 430, Height = 330 };
+    private readonly Canvas _equipmentCanvas = new() { Width = 430, Height = 365 };
     private readonly ComboBox _pickupCombo = new();
 
     private readonly TextBlock _foeName = new();
@@ -680,20 +680,26 @@ public sealed partial class MainWindow : Window
         return grid;
     }
 
+    #region [ CANVAS ]
+
     private void RefreshEquipment()
     {
         _equipmentCanvas.Children.Clear();
         var panel = CreateImage("UserInterfaceElements/EquipmentPanel.png", Stretch.Fill);
-        Place(_equipmentCanvas, panel, 0, 0, 430, 330);
+        Place(_equipmentCanvas, panel, 0, 0, 430, 336);
 
-        AddEquipmentSlot("Head", 10, 32, 75, 88);
-        AddEquipmentSlot("Gloves", 10, 132, 75, 82);
-        AddEquipmentSlot("Boots", 10, 226, 75, 91);
-        AddEquipmentSlot("Weapon", 96, 52, 77, 224);
-        AddEquipmentSlot("Body", 178, 52, 106, 224);
-        AddEquipmentSlot("Shield", 288, 55, 78, 220);
-        AddEquipmentSlot("Amulet", 368, 88, 52, 65);
-        AddEquipmentSlot("Ring", 368, 167, 52, 65);
+        AddEquipmentSlot("Head", 9, 26, 79, 92);
+        AddEquipmentSlot("Gloves", 9, 120, 79, 90);
+        AddEquipmentSlot("Boots", 9, 210, 79, 98);
+
+        AddEquipmentSlot("Weapon", 96, 26, 77, 215);
+        AddEquipmentSlot("Ammo", 96, 250, 76, 88);
+
+        AddEquipmentSlot("Body", 176, 26, 106, 223);
+        AddEquipmentSlot("Shield", 284, 26, 78, 214);
+
+        AddEquipmentSlot("Amulet", 367, 72, 54, 74);
+        AddEquipmentSlot("Ring", 367, 155, 54, 73);
     }
 
     private void AddEquipmentSlot(string slotName, double x, double y, double width, double height)
@@ -741,6 +747,8 @@ public sealed partial class MainWindow : Window
         BaseItem? definition = GetDefinition(item);
         return CreateImage(definition?.Miniature2D, Stretch.Uniform);
     }
+
+    #endregion
 
     #endregion
 
@@ -971,7 +979,7 @@ public sealed partial class MainWindow : Window
     }
 
     private static BaseItem? GetDefinition(IOwnedUsable item)
-        => (item as BaseItemInstance)?.Definition;
+        => (item as BaseItemINS)?.Definition;
 
     #endregion
 

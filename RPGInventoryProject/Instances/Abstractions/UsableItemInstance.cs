@@ -7,7 +7,7 @@ using System.Linq;
 namespace InventoryCoreLib
 {
     public abstract class UsableItemInstance<TEffect, TTarget> :
-        BaseItemInstance, IStackable
+        BaseItemINS, IStackable
         where TTarget: IAffectable
         where TEffect : class, IAffect
     {

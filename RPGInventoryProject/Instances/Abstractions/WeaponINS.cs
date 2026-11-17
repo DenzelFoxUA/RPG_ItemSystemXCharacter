@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace InventoryCoreLib
 {
-    public abstract class WeaponInstance<Effect,TTarget> : 
+    public abstract class WeaponINS<Effect,TTarget> : 
         DurableInstance<Effect, TTarget>, ICanDealDamage
        where Effect : class, IAffect
         where TTarget : class, IAffectable
@@ -27,7 +27,7 @@ namespace InventoryCoreLib
         public uint CurrentPrimaryDamage { get; protected set; } = 0;
         public uint CurrentSecondaryDamage { get; protected set; } = 0;
 
-        public WeaponInstance(BaseWeapon _weapon, params Effect[]?effects) :
+        public WeaponINS(BaseWeapon _weapon, params Effect[]?effects) :
             base(_weapon,effects)
         {
             CurrentPrimaryDamage = Weapon.PrimaryAttack.MaxDamage;

@@ -6,7 +6,7 @@ using System;
 namespace InventoryCoreLib
 {
 
-    public abstract class BaseItemInstance
+    public abstract class BaseItemINS
     {
         private BaseItem? _itemDefinition;
 
@@ -16,7 +16,7 @@ namespace InventoryCoreLib
 
         #region [ CTOR ]
 
-        public BaseItemInstance(BaseItem definition)
+        public BaseItemINS(BaseItem definition)
         {
             if (definition is null)
                 throw new ArgumentNullException(nameof(definition));
@@ -29,7 +29,7 @@ namespace InventoryCoreLib
 
         #region Equals
 
-        public bool Equals(BaseItemInstance? other)
+        public bool Equals(BaseItemINS? other)
         {
             if (ReferenceEquals(other, null))
                 return false;
@@ -41,7 +41,7 @@ namespace InventoryCoreLib
 
         public override bool Equals(object? obj)
         {
-            return Equals(obj as BaseItemInstance);
+            return Equals(obj as BaseItemINS);
         }
 
         public override int GetHashCode()
@@ -53,7 +53,7 @@ namespace InventoryCoreLib
             return hash.ToHashCode();
         }
 
-        public static bool? operator ==(BaseItemInstance? one, BaseItemInstance? other)
+        public static bool? operator ==(BaseItemINS? one, BaseItemINS? other)
         {
 
             if (ReferenceEquals(one, other)) return true;
@@ -64,7 +64,7 @@ namespace InventoryCoreLib
             return one.Equals(other);
         }
 
-        public static bool? operator !=(BaseItemInstance one, BaseItemInstance other)
+        public static bool? operator !=(BaseItemINS one, BaseItemINS other)
         {
             return !(one == other);
         }

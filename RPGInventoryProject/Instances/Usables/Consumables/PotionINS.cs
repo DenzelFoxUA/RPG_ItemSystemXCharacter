@@ -6,14 +6,14 @@ using System.Collections.Generic;
 
 namespace InventoryCoreLib
 {
-    public class PotionInstance :
+    public class PotionINS :
          UsableItemInstance<IAffect, 
             IAffectableCharacter>
     {
 
         private Action<IOwnedUsable>? _useFunction = null;
 
-        public PotionInstance(PotionDefinition potion, uint stackCount, 
+        public PotionINS(PotionDefinition potion, uint stackCount, 
             params IAffect[] effects) 
             : base(potion, stackCount, effects)
         {

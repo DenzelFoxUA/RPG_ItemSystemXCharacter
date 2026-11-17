@@ -1,12 +1,14 @@
-﻿using CharacterMainLib;
+﻿
+
+using CharacterMainLib;
 
 namespace InventoryCoreLib
 {
-    public class ShieldInstance :
+    public class HelmetINS :
         ArmorInstance<IAffect,
             IAffectableCharacter>
     {
-        public ShieldInstance(in BaseArmor armor, 
+        public HelmetINS(BaseArmor armor, 
             params IAffect[] effects) 
             : base(armor, effects)
         {

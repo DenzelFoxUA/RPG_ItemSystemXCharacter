@@ -1,12 +1,9 @@
-﻿
-using InventoryCoreLib;
+﻿using InventoryCoreLib;
 using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace DemoGameLib
 {
@@ -15,125 +12,10 @@ namespace DemoGameLib
         private readonly EffectsBuilder _effectsBuilder;
         private readonly JsonSerializerOptions _jsonOptions;
 
-        #region [ DATA TRANSFER PACKETS ]
 
-        private sealed class ItemData
-        {
-            public string Category { get; init; } = "";
-            public string Type { get; init; } = "";
+        #region ======== [ BUILD WEAPON ] =========================================
 
-            public uint Id { get; init; }
-            public string Name { get; init; } = "";
-            public string Description { get; init; } = "";
-
-            public double Weight { get; init; }
-            public uint Price { get; init; }
-
-            public string Icon { get; init; } = "";
-            public string Miniature2D { get; init; } = "";
-
-            public bool IsStackable { get; init; }
-            public uint MaxStackSize { get; init; }
-            
-
-            //optional
-            public EquipableData? Equipable { get; init; }
-            public DurableData? Durable { get; init; }
-            public WeaponData? Weapon { get; init; }
-            public ArmorData? Armor { get; init; }
-            public ConsumableData? Consumable { get; init; }
-            public ToolData? Tool { get; init; }
-
-        }
-
-        private sealed class EquipableData
-        {
-            public string EquipmentCategory { get; init; } = "";
-            public uint LevelRequired { get; init; }
-
-            public IEnumerable<EffectData> Effects { get; init; } = [];
-        }
-
-        private sealed class DurableData
-        {
-            public uint MaxDurability { get; init; }
-            public bool IsIndestructible { get; init; }
-        }
-
-        private sealed class AttackData
-        {
-            public uint MaxDamage { get; init; }
-
-            public double AttackRange { get; init; }
-        }
-
-        private sealed class WeaponData
-        {
-            public AttackData PrimaryAttack { get; init; } = default!;
-
-            public AttackData? SecondaryAttack { get; init; }
-
-            public bool IsTwoHanded { get; init; }
-        }
-
-        private sealed class ArmorData
-        {
-            public uint MaxDefence { get; init; }
-        }
-
-        private sealed class ConsumableData
-        {
-            public bool IsSelfApplycable { get; init; }
-            public string ConsumableType { get; init; } = "";
-            public uint Volume { get; init; }
-
-            //для кастомних ефектів на майбутнє
-            public IEnumerable<EffectData> CustomEffects { get; init; } = [];
-        }
-
-        private sealed class ToolData
-        {
-            public uint MaxNumberOfUses { get; init; }
-        }
-
-        #endregion
-
-        // ====================== LOAD FILES ==================================
-
-        private Dictionary<uint, ItemData> LoadItemsFromFiles()
-        {
-            Dictionary<uint, ItemData> tempList = new();
-
-            string path = Path.Combine(
-                        AppContext.BaseDirectory,
-                        "JSON_Data",
-                        "Items"
-                        );
-
-            IEnumerable<string> files = 
-                Directory.GetFiles(path, "*.json", SearchOption.AllDirectories);
-
-            //if (files.Count() == 0)
-            //    throw new FileLoadException($"NO JSON files found in: {path}!");
-
-            foreach (var file in files)
-            {
-                string resultJson = File.ReadAllText(file);
-
-                ItemData currentItem = JsonSerializer.Deserialize<ItemData>(resultJson, _jsonOptions)
-                ?? throw new InvalidDataException($"::ERR_DESERIALIZATION::\n File: {file}.");
-
-                tempList.Add(currentItem.Id, currentItem);
-            }
-
-            return tempList;
-        }
-
-        // ==========================================================================
-
-        #region [ BUILD WEAPON ] ===================================================
-
-        private AttackDefinition BuildAttack(AttackData data)
+        private AttackDefinition BuildAttack(DTO.AttackData data)
         {
             return new AttackDefinition 
             {
@@ -142,7 +24,7 @@ namespace DemoGameLib
             };
         }
 
-        private IAffect[] BuildItemEffects(ItemData data)
+        private IAffect[] BuildItemEffects(DTO.ItemData data)
         {
             if (data.Equipable!.Effects is null)
                 return [];
@@ -150,7 +32,7 @@ namespace DemoGameLib
             return _effectsBuilder.Build(data.Equipable.Effects);
         }
 
-        private BaseItemInstance BuildWeapon(ItemData weapon)
+        private BaseItemINS BuildWeapon(DTO.ItemData weapon)
         {
             switch (weapon.Type)
             {
@@ -163,13 +45,13 @@ namespace DemoGameLib
             };
         }
 
-        private DaggerInstance BuildDagger(ItemData data)
+        private ShortBladeINS BuildDagger(DTO.ItemData data)
         {
             ValidateWeaponData(data);
 
-            EquipableData equipablePart = data.Equipable!;
-            DurableData durablePart = data.Durable!;
-            WeaponData weapon = data.Weapon!;
+            DTO.EquipableData equipablePart = data.Equipable!;
+            DTO.DurableData durablePart = data.Durable!;
+            DTO.WeaponData weapon = data.Weapon!;
 
             AttackDefinition primaryAttack = 
                 BuildAttack(weapon.PrimaryAttack);
@@ -196,22 +78,22 @@ namespace DemoGameLib
             IAffect [] effects =
                 BuildItemEffects(data);
 
-            return new DaggerInstance(
+            return new ShortBladeINS(
                 definition,
                 effects);
         }
 
         #endregion
 
-        #region [ BUILD ARMOR ] ====================================================
+        #region ======== [ BUILD ARMOR ] ==============================================
 
-        private BaseItemInstance BuildArmor(ItemData armor)
+        private BaseItemINS BuildArmor(DTO.ItemData armor)
         {
             ValidateArmorData(armor);
 
-            EquipableData equipablePart = armor.Equipable!;
-            DurableData durablePart = armor.Durable!;
-            ArmorData armorPart = armor.Armor!;
+            DTO.EquipableData equipablePart = armor.Equipable!;
+            DTO.DurableData durablePart = armor.Durable!;
+            DTO.ArmorData armorPart = armor.Armor!;
 
             ArmorDefinition definition = new ArmorDefinition(
                 armor.Id,
@@ -231,11 +113,11 @@ namespace DemoGameLib
 
             return equipablePart.EquipmentCategory switch
             {
-                "Body" => new BodyArmorInstance(definition, effects),
-                "Head" => new HelmetInstance(definition,effects),
-                "Gloves" => new GlovesInstance(definition, effects),
-                "Boots" => new BootsInstance(definition, effects),
-                "Shield" => new ShieldInstance(definition, effects),
+                "Body" => new BodyArmorINS(definition, effects),
+                "Head" => new HelmetINS(definition,effects),
+                "Gloves" => new GlovesINS(definition, effects),
+                "Boots" => new BootsINS(definition, effects),
+                "Shield" => new ShieldINS(definition, effects),
                 _ => throw new InvalidDataException(
                     $"Unsupported item type: {armor.Type}")
             };
@@ -243,9 +125,9 @@ namespace DemoGameLib
 
         #endregion
 
-        #region [ BUILD JEWELRY ] ==========================================
+        #region ======== [ BUILD JEWELRY ] ==========================================
 
-        private BaseItemInstance BuildJewelry(ItemData trinkett)
+        private BaseItemINS BuildJewelry(DTO.ItemData trinkett)
         {
             if (trinkett.Equipable is null)
             {
@@ -253,7 +135,7 @@ namespace DemoGameLib
                     $"{trinkett.Name}: Equipable data is missing.");
             }
 
-            EquipableData equipablePart = trinkett.Equipable!;
+            DTO.EquipableData equipablePart = trinkett.Equipable!;
 
             JewelryDefinition definition = new JewelryDefinition(
                 trinkett.Id,
@@ -273,9 +155,9 @@ namespace DemoGameLib
 
         #endregion
 
-        #region [ BUILD CONSUMABLE ] =======================================
+        #region ======== [ BUILD CONSUMABLE ] =======================================
 
-        private BaseItemInstance BuildConsumable(ItemData data)
+        private BaseItemINS BuildConsumable(DTO.ItemData data)
         {
             if (data.Consumable is null)
             {
@@ -283,7 +165,7 @@ namespace DemoGameLib
                     $"{data.Name}: Consumable data is missing.");
             }
 
-            ConsumableData consumable = data.Consumable;
+            DTO.ConsumableData consumable = data.Consumable;
 
             return consumable.ConsumableType switch
             {
@@ -295,7 +177,8 @@ namespace DemoGameLib
             };
         }
 
-        private BaseItemInstance BuildPotion(ItemData data, ConsumableData consumable)
+        private BaseItemINS BuildPotion(DTO.ItemData data, 
+            DTO.ConsumableData consumable)
         {
             PotionDefinition definition =
                 new PotionDefinition(
@@ -311,10 +194,11 @@ namespace DemoGameLib
 
             IAffect[] effects = _effectsBuilder.Build(consumable.CustomEffects);
 
-            return new PotionInstance(definition, 1, effects);
+            return new PotionINS(definition, 1, effects);
         }
 
-        private BaseItemInstance BuildFood(ItemData data,ConsumableData consumable)
+        private BaseItemINS BuildFood(DTO.ItemData data, 
+            DTO.ConsumableData consumable)
         {
             IAffect[] effects = _effectsBuilder.Build(consumable.CustomEffects);
 
@@ -328,15 +212,14 @@ namespace DemoGameLib
                 data.Icon,
                 data.Miniature2D);
 
-            return new FoodInstance(definition, 1, effects);
+            return new FoodINS(definition, 1, effects);
         }
 
         #endregion
 
+        #region ========= [ DTO VALIDATORS ] ============================================
 
-        // ======================== VALIDATORS ======================================
-
-        private void ValidateWeaponData(ItemData data)
+        private void ValidateWeaponData(DTO.ItemData data)
         {
             if (data.Equipable is null)
                 throw new InvalidDataException(
@@ -355,7 +238,7 @@ namespace DemoGameLib
                     $"{data.Name}: Primary attack is missing.");
         }
 
-        private void ValidateArmorData(ItemData armor)
+        private void ValidateArmorData(DTO.ItemData armor)
         {
             if (armor.Equipable is null)
             {
@@ -376,10 +259,11 @@ namespace DemoGameLib
             }
         }
 
+        #endregion
 
-        // ===========================================================================
+        private FrozenDictionary<uint, DTO.ItemData>? ITEMS_LIB { get; init; }
 
-        private FrozenDictionary<uint, ItemData>? ITEMS_LIB { get; init; }
+        #region ==== [CREATOR CTOR] =============================================
 
         public ItemsCreator()
         {
@@ -394,18 +278,21 @@ namespace DemoGameLib
 
             _jsonOptions = options;
 
-            ITEMS_LIB = LoadItemsFromFiles().ToFrozenDictionary();
+            ITEMS_LIB = FilesLoader.LoadItemsFromFiles(_jsonOptions)
+                .ToFrozenDictionary();
         }
+
+        #endregion
 
         public IOwnedUsable BuildItem(uint id)
         {
             if (ITEMS_LIB is null)
                 throw new ObjectNotInitializedException(nameof(ITEMS_LIB));
 
-            if (!ITEMS_LIB.TryGetValue(id, out ItemData? item))
+            if (!ITEMS_LIB.TryGetValue(id, out DTO.ItemData? item))
                 throw new KeyNotFoundException($"Item with ID {id} not found.");
 
-            BaseItemInstance result = item.Category switch
+            BaseItemINS result = item.Category switch
             {
                 "Weapon" => BuildWeapon(item),
                 "Armor" =>  BuildArmor(item),
@@ -424,6 +311,9 @@ namespace DemoGameLib
 
         public IEnumerable<(uint Id, string Name)> GetAvailableItems()
         {
+            if (ITEMS_LIB is null)
+                throw new ObjectNotInitializedException(nameof(ITEMS_LIB));
+
             foreach (var item in ITEMS_LIB.Values)
             {
                 yield return (item.Id,item.Name);

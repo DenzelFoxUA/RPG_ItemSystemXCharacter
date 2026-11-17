@@ -5,8 +5,8 @@ using System;
 
 namespace InventoryCoreLib
 {
-    public class DaggerInstance
-        : WeaponInstance<IAffect, 
+    public class ShortBladeINS
+        : WeaponINS<IAffect, 
             IAffectableCharacter>
     {
         private DaggerDefinition Dagger => (DaggerDefinition)Definition!;
@@ -14,7 +14,7 @@ namespace InventoryCoreLib
         private Action<IOwnedEquipable>? _useFunction = null;
         private Func<string, IOwnedEquipable?>? _unequipFunction = null;
 
-        public DaggerInstance(DaggerDefinition daggerItem, 
+        public ShortBladeINS(DaggerDefinition daggerItem, 
             params IAffect[]? effects) : base(daggerItem, effects)
         {
 
@@ -61,6 +61,5 @@ namespace InventoryCoreLib
             }
         }
 
-        
     }
 }

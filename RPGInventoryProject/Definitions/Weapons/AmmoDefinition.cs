@@ -2,13 +2,12 @@
 
 namespace InventoryCoreLib
 {
-    public class AmmoDefinition : BaseItem
+    public class AmmoDefinition : EquipableItem
     {
         public AmmoDefinition(
              uint id,
              string name,
              string describtion,
-             uint volume,
              double weight_kg,
              uint price,
              uint maxStackSize,

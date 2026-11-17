@@ -276,7 +276,7 @@ namespace InventoryCoreLib
             }
 
             if (EquipmentSlots["Weapon"].ItemInstance is
-                WeaponInstance<IAffectImmediately<IAffectableCharacter>, IAffectableCharacter> weapon)
+                WeaponINS<IAffectImmediately<IAffectableCharacter>, IAffectableCharacter> weapon)
             {
 
                 weapon.SetMyTarget(currTarget);

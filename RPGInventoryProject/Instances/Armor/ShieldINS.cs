@@ -2,14 +2,15 @@
 
 namespace InventoryCoreLib
 {
-    public class GlovesInstance :
+    public class ShieldINS :
         ArmorInstance<IAffect,
             IAffectableCharacter>
     {
-        public GlovesInstance(BaseArmor armor, 
+        public ShieldINS(in BaseArmor armor, 
             params IAffect[] effects) 
             : base(armor, effects)
         {
+            
         }
     }
 }

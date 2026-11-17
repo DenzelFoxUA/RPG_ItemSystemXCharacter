@@ -7,7 +7,7 @@ using System.Linq;
 namespace InventoryCoreLib
 {
     public abstract class EquipableInstance<TEffect, TTarget>
-        : BaseItemInstance, IOwnedEquipable
+        : BaseItemINS, IOwnedEquipable
         where TTarget : class, IAffectable
         where TEffect : class, IAffect
     {

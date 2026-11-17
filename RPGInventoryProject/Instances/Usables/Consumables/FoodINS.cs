@@ -5,13 +5,13 @@ using System;
 
 namespace InventoryCoreLib
 {
-    public class FoodInstance : UsableItemInstance<IAffect,
+    public class FoodINS : UsableItemInstance<IAffect,
             IAffectableCharacter>
     {
 
         private Action<IOwnedUsable>? _useFunction = null;
 
-        public FoodInstance(BaseItem item, uint stackCount, 
+        public FoodINS(BaseItem item, uint stackCount, 
             params IAffect[]? effects) : base(item, stackCount, effects)
         {
         }
