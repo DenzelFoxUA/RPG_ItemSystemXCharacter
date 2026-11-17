@@ -7,11 +7,9 @@ namespace InventoryCoreLib
     {
         private Action<IAmmo>? _useFunction = null;
         private Func<string,IOwnedEquipable?>? _clearFunction = null;
-
         private AmmoDefinition Ammo => (AmmoDefinition)Definition!;
 
         protected uint _currentStackCount = 0;
-
         public uint CurrentStackCount => _currentStackCount;
 
         public AmmoINS(AmmoDefinition definition, uint count, params IAffect[] effects) 
@@ -80,7 +78,6 @@ namespace InventoryCoreLib
         {
             return Ammo.AmmoType;
         }
-
 
         #region [ STACK OPERATIONS ]
 

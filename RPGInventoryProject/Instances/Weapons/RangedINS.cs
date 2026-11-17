@@ -1,5 +1,4 @@
-﻿
-using CharacterMainLib;
+﻿using CharacterMainLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,7 +54,6 @@ namespace InventoryCoreLib
             {
                 _unequipFunction.Invoke(this.GetEquipSlotCategory());
             }
-                
         }
 
         public override void Equip()
