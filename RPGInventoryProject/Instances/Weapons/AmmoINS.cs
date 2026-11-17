@@ -8,6 +8,8 @@ namespace InventoryCoreLib
         private Action<IAmmo>? _useFunction = null;
         private Func<string,IOwnedEquipable?>? _clearFunction = null;
 
+        private AmmoDefinition Ammo => (AmmoDefinition)Definition!;
+
         protected uint _currentStackCount = 0;
 
         public uint CurrentStackCount => _currentStackCount;
@@ -15,7 +17,7 @@ namespace InventoryCoreLib
         public AmmoINS(AmmoDefinition definition, uint count, params IAffect[] effects) 
             : base(definition, effects)
         {
-            Math.Clamp(count, 1u, Definition!.MaxStackSize);
+            _currentStackCount = Math.Clamp(count, 1u, Definition!.MaxStackSize);
         }
 
         public override void SetTargetFunction()
@@ -63,8 +65,27 @@ namespace InventoryCoreLib
 
         public override void Update()
         {
-            if (CurrentStackCount == 0)
-                Unequip();
+            //if (CurrentStackCount == 0)
+            //    _clearFunction!.Invoke(this.GetEquipSlotCategory());
+        }
+
+        public override void SetMyTarget(IAffectable? target)
+        {
+            if (ReferenceEquals(target, MyOwner))
+                return;
+
+            _target = target;
+        }
+
+        public string GetAmmoType()
+        {
+            return Ammo.AmmoType;
+        }
+
+        public void UseOne()
+        {
+            _currentStackCount--;
+         
         }
     }
 }

@@ -5,7 +5,6 @@ namespace InventoryCoreLib
 {
     public static class WeaponDistanceConstants
     {
-
         //dagger
         public const double DAGGER_PHYSICAL_ATTACK_DIST = 1.0d;
 

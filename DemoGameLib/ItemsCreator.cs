@@ -1,4 +1,5 @@
-﻿using InventoryCoreLib;
+﻿
+using InventoryCoreLib;
 using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
@@ -36,8 +37,8 @@ namespace DemoGameLib
         {
             switch (weapon.Type)
             {
-                case "Dagger": return BuildDagger(weapon);
-                //case "Sword": return BuildSword(weapon);
+                case "ShortBlade": return BuildShortBlade(weapon);
+                case "Ranged": return BuildRanged(weapon);
                 //case "Bow": return BuildBow(weapon);
 
                 default:  throw new InvalidDataException(
@@ -45,7 +46,7 @@ namespace DemoGameLib
             };
         }
 
-        private ShortBladeINS BuildDagger(DTO.ItemData data)
+        private ShortBladeINS BuildShortBlade(DTO.ItemData data)
         {
             ValidateWeaponData(data);
 
@@ -61,7 +62,7 @@ namespace DemoGameLib
                 BuildAttack(weapon.SecondaryAttack)
                     : null;
 
-            DaggerDefinition definition = new(
+            ShortBladeDefinition definition = new(
                 data.Id,
                 data.Name, 
                 data.Description, 
@@ -81,6 +82,78 @@ namespace DemoGameLib
             return new ShortBladeINS(
                 definition,
                 effects);
+        }
+
+        private RangedINS BuildRanged(DTO.ItemData data)
+        {
+            ValidateWeaponData(data);
+
+            if(data.Ammo is null)
+            {
+                throw new InvalidDataException(
+                    $"{data.Name}: Ammo data is missing.");
+            }
+
+            DTO.EquipableData equipablePart = data.Equipable!;
+            DTO.DurableData durablePart = data.Durable!;
+            DTO.WeaponData weapon = data.Weapon!;
+            DTO.AmmoData ammo = data.Ammo!;
+
+            AttackDefinition primaryAttack =
+                BuildAttack(weapon.PrimaryAttack);
+
+            AttackDefinition? secondaryAttack =
+                weapon.SecondaryAttack is not null ?
+                BuildAttack(weapon.SecondaryAttack)
+                    : null;
+
+            RangedWeapon definition = new RangedWeapon(
+                data.Id,
+                data.Name,
+                ammo.AmmoType,
+                data.Description,
+                data.Weight,
+                data.Price,
+                durablePart.MaxDurability,
+                equipablePart.LevelRequired,
+                primaryAttack,
+                secondaryAttack,
+                durablePart.IsIndestructible,
+                false,
+                data.Icon,
+                data.Miniature2D);
+
+            IAffect[] effects =
+                BuildItemEffects(data);
+
+            return new RangedINS(
+                definition,
+                effects);
+        }
+
+        #endregion
+
+        #region ====== [ BUILD AMMO ] ===============================================
+
+        private BaseItemINS BuildAmmo(DTO.ItemData ammo)
+        {
+            DTO.AmmoData ammoData = ammo.Ammo!;
+
+            AmmoDefinition definition = new AmmoDefinition(
+                ammo.Id,
+                ammoData.AmmoType,
+                ammo.Name,
+                ammo.Description,
+                ammo.Weight,
+                ammo.Price,
+                ammo.MaxStackSize,
+                ammo.Icon,
+                ammo.Miniature2D
+                );
+
+            IAffect[] effects = BuildItemEffects(ammo);
+
+            return new AmmoINS(definition, ammo.MaxStackSize, effects);
         }
 
         #endregion
@@ -298,6 +371,7 @@ namespace DemoGameLib
                 "Armor" =>  BuildArmor(item),
                 "Consumable" => BuildConsumable(item),
                 "Jewelry" => BuildJewelry(item),
+                "Ammo" => BuildAmmo(item),
                 //"Tool" => break;
                 //"Scroll" => break;
                 //"Recharger" => break;

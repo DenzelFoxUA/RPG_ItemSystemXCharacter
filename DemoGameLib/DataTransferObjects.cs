@@ -29,6 +29,7 @@ namespace DemoGameLib.DTO
         public DurableData? Durable { get; init; }
         public WeaponData? Weapon { get; init; }
         public ArmorData? Armor { get; init; }
+        public AmmoData? Ammo { get; init; }
         public ConsumableData? Consumable { get; init; }
         public ToolData? Tool { get; init; }
 
@@ -83,6 +84,13 @@ namespace DemoGameLib.DTO
     {
         public uint MaxNumberOfUses { get; init; }
     }
+
+    internal sealed class AmmoData
+    {
+        public string AmmoType { get; init; } = "";
+    
+    }
+
 
     #endregion
 }

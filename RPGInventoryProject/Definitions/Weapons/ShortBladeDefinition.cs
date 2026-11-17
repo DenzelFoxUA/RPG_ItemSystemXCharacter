@@ -4,9 +4,9 @@ using System.Collections.Generic;
 
 namespace InventoryCoreLib
 {
-    public class DaggerDefinition : BaseWeapon
+    public class ShortBladeDefinition : BaseWeapon
     {
-        public DaggerDefinition(uint id, 
+        public ShortBladeDefinition(uint id, 
             string name, 
             string describtion, 
             double weight_kg,

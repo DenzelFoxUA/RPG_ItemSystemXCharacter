@@ -9,12 +9,12 @@ namespace InventoryCoreLib
         : WeaponINS<IAffect, 
             IAffectableCharacter>
     {
-        private DaggerDefinition Dagger => (DaggerDefinition)Definition!;
+        private ShortBladeDefinition Dagger => (ShortBladeDefinition)Definition!;
 
         private Action<IOwnedEquipable>? _useFunction = null;
         private Func<string, IOwnedEquipable?>? _unequipFunction = null;
 
-        public ShortBladeINS(DaggerDefinition daggerItem, 
+        public ShortBladeINS(ShortBladeDefinition daggerItem, 
             params IAffect[]? effects) : base(daggerItem, effects)
         {
 

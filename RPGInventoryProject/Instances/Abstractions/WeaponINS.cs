@@ -39,7 +39,7 @@ namespace InventoryCoreLib
         }
 
         //IAttack
-        public AttackComplex PrimaryAttack(IAffectable? target)
+        public virtual AttackComplex PrimaryAttack(IAffectable? target)
         {
             if (Weapon.PrimaryAttack == null)
                 throw new ObjectNotInitializedException(nameof(Weapon.PrimaryAttack));
@@ -49,7 +49,7 @@ namespace InventoryCoreLib
             return new AttackComplex(CurrentPrimaryDamage, dist, Effects);
         }
 
-        public AttackComplex? SecondaryAttack(IAffectable? target)
+        public virtual AttackComplex? SecondaryAttack(IAffectable? target)
         {
             if (Weapon.SecondaryAttack is null)
             {

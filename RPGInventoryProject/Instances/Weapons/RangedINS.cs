@@ -4,19 +4,19 @@ using System;
 
 namespace InventoryCoreLib
 {
-    public abstract class RangedINS :
+    public class RangedINS :
         WeaponINS<IAffect, IAffectable>, IRanged
     {
 
         private Action<IOwnedEquipable>? _useFunction = null;
         private Func<string, IOwnedEquipable?>? _unequipFunction = null;
-        private Action<IAmmo>? _clearAmmo = null;
+        //private Action<IAmmo>? _clearAmmo = null;
 
         private RangedWeapon RangedWeapon => (RangedWeapon)Definition!;
 
         public IAmmo? CurrentAmmoInstance { get; protected set; }
 
-        public uint CurrentAmmoCount => CurrentAmmoInstance!.GetStackCount();
+        public uint CurrentAmmoCount => CurrentAmmoInstance!.CurrentStackCount;
 
         public RangedINS(RangedWeapon _weapon,
             params IAffect[] effects) :
@@ -25,32 +25,17 @@ namespace InventoryCoreLib
 
         }
 
-        public virtual IAmmo? LoadAmmo(IAmmo? ammo)
+        public virtual void SetAmmo(IAmmo? ammo)
         {
             if (ammo is null)
-                return null;
+                return;
 
-            if(CurrentAmmoInstance is not null)
-            {
-                (CurrentAmmoInstance, ammo) = (ammo, CurrentAmmoInstance);
-            }
-            else
-            {
-                CurrentAmmoInstance = ammo;
-                ammo = null;
-            }
-
-            return ammo;
+            CurrentAmmoInstance = ammo;
         }
 
-        public virtual IAmmo? ClearAmmo()
+        public virtual void ClearAmmo()
         {
-            if (CurrentAmmoInstance is null)
-                return null;
-
-            IAmmo buffer = CurrentAmmoInstance;
             CurrentAmmoInstance = null;
-            return buffer;
         }
 
         public override void Use()
@@ -85,7 +70,7 @@ namespace InventoryCoreLib
                 return;
 
             IsEquipped = false;
-
+            CurrentAmmoInstance!.Use();
             CancelMyTarget();
         }
 
@@ -95,8 +80,66 @@ namespace InventoryCoreLib
             {
                 _useFunction = MyOwner.Equip;
                 _unequipFunction = MyOwner.Unequip;
-                _clearAmmo = MyOwner.PickUpItem;
             }
         }
+
+        public override AttackComplex PrimaryAttack(IAffectable? target)
+        {
+            if (Weapon.PrimaryAttack == null)
+                throw new ObjectNotInitializedException(nameof(Weapon.PrimaryAttack));
+
+            if(CurrentAmmoInstance is null)
+            {
+                return null!;
+            }
+
+            if (RangedWeapon.AmmoType != CurrentAmmoInstance!.GetAmmoType())
+            {
+                throw new CannotUseItemException(nameof(CurrentAmmoInstance));
+            }
+
+            var dist = Weapon.PrimaryAttack.AttackRange;
+
+            CurrentAmmoInstance.UseOne();
+
+            return new AttackComplex(CurrentPrimaryDamage, dist, Effects);
+        }
+
+        public override AttackComplex? SecondaryAttack(IAffectable? target)
+        {
+            if (Weapon.SecondaryAttack is null)
+            {
+                return null;
+            }
+
+            if (RangedWeapon.AmmoType != CurrentAmmoInstance!.GetAmmoType())
+            {
+                throw new CannotUseItemException(nameof(CurrentAmmoInstance));
+            }
+
+            var dist = Weapon.PrimaryAttack.AttackRange;
+
+            CurrentAmmoInstance!.UseOne();
+
+            return new AttackComplex(CurrentSecondaryDamage, dist, Effects);
+        }
+
+        public override void SetMyTarget(IAffectable? target)
+        {
+            if (ReferenceEquals(target, MyOwner))
+                return;
+
+            Target = target;
+
+            if(CurrentAmmoInstance is null)
+            {
+                Console.WriteLine("Cannot shot without arrows");
+                return;
+            }
+            
+            CurrentAmmoInstance!.SetMyTarget(Target);
+        }
+
+        public string GetAmmoType() => RangedWeapon.AmmoType;
     }
 }

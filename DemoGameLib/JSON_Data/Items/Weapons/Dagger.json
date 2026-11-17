@@ -1,8 +1,8 @@
 {
   "Category": "Weapon",
-  "Type": "Dagger",
+  "Type": "ShortBlade",
 
-  "Id": 144,
+  "Id": 101,
   "Name": "Poisoned Dagger",
   "Description": "Steel dagger coated with poison.",
 

@@ -564,14 +564,21 @@ public sealed partial class MainWindow : Window
         uint attack = 0;
         if (_character.Equipment.ItemAtSlot("Weapon") is ICanDealDamage weapon)
         {
-            try
-            {
-                attack = weapon.PrimaryAttack(_currentFoe.Actor).Damage;
-            }
-            catch
-            {
+            if (weapon.PrimaryAttack(_currentFoe.Actor) is null)
                 attack = 0;
+            else
+            {
+                try
+                {
+                    attack = weapon.PrimaryAttack(_currentFoe.Actor).Damage;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    attack = 0;
+                }
             }
+            
         }
 
         _attackText.Text = attack.ToString();

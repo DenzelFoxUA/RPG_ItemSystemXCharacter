@@ -161,7 +161,6 @@ namespace InventoryCoreLib
             if (EquipmentSlots is null)
                 throw new ObjectNotInitializedException(nameof(EquipmentSlots));
 
-
             if (slotName == string.Empty || !EquipmentSlots.ContainsKey(slotName))
                 throw new InvalidParameterNameException(nameof(slotName));
 
@@ -174,6 +173,16 @@ namespace InventoryCoreLib
             {
                 EquipmentSlots[slotName].ItemInstance!.Unequip();
             }
+
+            ////коли закінчуються аммо то інстанс зникає
+            //if(slotName == "Ammo" && 
+            //    EquipmentSlots[slotName].ItemInstance is IAmmo ammo)
+            //{
+            //    if (ammo.CurrentStackCount == 0)
+            //    {
+            //        return null;
+            //    }   
+            //}
 
             return EquipmentSlots[slotName].Unequip();
         }
@@ -192,12 +201,43 @@ namespace InventoryCoreLib
 
         #region [ UPDATE ]
 
+        protected void UpdateRangedWeapon()
+        {
+            if (EquipmentSlots is null)
+                throw new ObjectNotInitializedException(nameof(EquipmentSlots));
+
+            if (EquipmentSlots["Weapon"].ItemInstance is
+                IRanged ranged)
+            {
+                if(EquipmentSlots["Ammo"] is not null && 
+                    EquipmentSlots["Ammo"].ItemInstance is IAmmo ammo)
+                {
+                    if (ranged.GetAmmoType() == ammo.GetAmmoType())
+                    {
+                        ranged.SetAmmo(ammo);
+                    }
+                    else
+                    {
+                        ranged.SetAmmo(null!);
+                    }
+                }
+                else
+                {
+                    ranged.SetAmmo(null!);
+                }
+
+            }
+        }
+
         public override void Update(float deltaTime)
         {
             uint tottalDefence = 0;
 
             if (EquipmentSlots is null)
                 throw new ObjectNotInitializedException(nameof(EquipmentSlots));
+
+
+                UpdateRangedWeapon();
 
             foreach(var block in EquipmentSlots)
             {

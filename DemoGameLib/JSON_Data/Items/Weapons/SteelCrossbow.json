@@ -1,0 +1,42 @@
+{
+  "Category": "Weapon",
+  "Type": "Ranged",
+
+  "Id": 102,
+  "Name": "Steel Crossbow",
+  "Description": "A sturdy crossbow designed to fire bolts.",
+  "Weight": 4.8,
+  "Price": 240,
+
+  "Icon": "Icons/Weapons/SteelCrossbow.png",
+  "Miniature2D": "Miniatures2D/Weapons/SteelCrossbow.png",
+
+  "IsStackable": false,
+  "MaxStackSize": 1,
+
+  "Equipable": {
+    "EquipmentCategory": "Weapon",
+    "LevelRequired": 3,
+    "Effects": []
+  },
+
+  "Durable": {
+    "MaxDurability": 900,
+    "IsIndestructible": false
+  },
+
+  "Weapon": {
+    "IsTwoHanded": true,
+
+    "PrimaryAttack": {
+      "MaxDamage": 32,
+      "AttackRange": 18.0
+    },
+
+    "SecondaryAttack": null
+  },
+
+  "Ammo": {
+    "AmmoType": "Bolt"
+  }
+}

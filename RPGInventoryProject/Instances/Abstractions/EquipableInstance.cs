@@ -23,6 +23,8 @@ namespace InventoryCoreLib
             }
         }
 
+        private bool _isEquipped;
+
         public IReadOnlyList<TEffect> Effects { get; }
 
         #region [ OWNER_TARGET ]
@@ -47,7 +49,15 @@ namespace InventoryCoreLib
 
         #endregion
 
-        public bool IsEquipped { get; protected set; } = false;
+        public bool IsEquipped
+        {
+            get => _isEquipped;
+
+            protected set
+            {
+                _isEquipped = value;
+            }
+        }
 
         public abstract void Use();
 

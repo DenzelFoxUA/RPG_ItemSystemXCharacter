@@ -6,7 +6,9 @@ namespace InventoryCoreLib
         //public void Reload();
         //public bool CanUseAmmo(IAmmoInstance ammo);
 
-        public IAmmo? LoadAmmo(IAmmo ammo);
-        public IAmmo? ClearAmmo();
+        public string GetAmmoType();
+
+        public void SetAmmo(IAmmo? ammo);
+        public void ClearAmmo();
     }
 }

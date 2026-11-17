@@ -219,14 +219,6 @@ namespace InventoryCoreLib
             return null;
         }
 
-        public void LoadAmmo(IAmmo ammo)
-        {
-            if (EquipmentSection!.GetInstanse("Weapon") is IRanged ranged)
-            {
-                ranged.LoadAmmo(ammo);
-            }
-        }
-
         #endregion
 
         #region [ Interfaces direct imlimentations ]

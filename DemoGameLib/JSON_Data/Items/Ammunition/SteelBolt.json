@@ -1,0 +1,26 @@
+{
+  "Category": "Ammo",
+  "Type": "Ammo",
+
+  "Id": 301,
+  "Name": "Steel Bolt",
+  "Description": "A steel-tipped bolt designed for crossbows.",
+  "Weight": 0.08,
+  "Price": 3,
+
+  "Icon": "Icons/Ammo/SteelBolt.png",
+  "Miniature2D": "Miniatures2D/Ammo/SteelBolt.png",
+
+  "IsStackable": true,
+  "MaxStackSize": 50,
+
+  "Equipable": {
+    "EquipmentCategory": "Ammo",
+    "LevelRequired": 1,
+    "Effects": []
+  },
+
+  "Ammo": {
+    "AmmoType": "Bolt"
+  }
+}
