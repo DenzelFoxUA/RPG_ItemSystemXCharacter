@@ -6,7 +6,8 @@ namespace InventoryCoreLib
 {
     public abstract class ArmorInstance<Effect, Target>: 
         DurableInstance<Effect,Target>, 
-        IReducePhysicalDamage
+        IReducePhysicalDamage,
+        IDurable
         where Effect : class, IAffect
         where Target : class, IAffectable
     {

@@ -3,15 +3,17 @@ namespace InventoryCoreLib
 {
     public class ToolDefinition : UsableItem
     {
-        public uint MaxNumberOfUses { get; protected init; }
+        public uint UseValue { get; protected init; }
+        //public uint MaxNumberOfUses { get; protected init; }
 
         public ToolDefinition(
              uint id,
              string name,
+             uint useValue,
              string describtion,
              double weight_kg,
              uint price,
-             uint numOfUses,
+             uint stackCount,
              string iconRef,
              string miniature2DRef)
         {
@@ -21,8 +23,8 @@ namespace InventoryCoreLib
             Descriprion = describtion;
             Weight = weight_kg;
             Price = price;
-
-            MaxNumberOfUses = numOfUses;
+            UseValue = useValue;
+            MaxStackSize = stackCount;
             IsSelfApplycable = false;
             Icon = iconRef;
             Miniature2D = miniature2DRef;

@@ -82,7 +82,8 @@ namespace DemoGameLib.DTO
 
     internal sealed class ToolData
     {
-        public uint MaxNumberOfUses { get; init; }
+        public string ToolType { get; init; } = "";
+        public uint UseValue { get; init; }
     }
 
     internal sealed class AmmoData

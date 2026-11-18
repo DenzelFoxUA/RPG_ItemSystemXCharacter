@@ -63,6 +63,13 @@ namespace InventoryCoreLib
                 CurrentDurability = Item.MaxDurability;
             else
                 CurrentDurability += points;
+
+            Console.WriteLine("Item repaired");
+        }
+
+        public uint GetCurrentDurability()
+        {
+            return CurrentDurability;
         }
     }
 }

@@ -1,6 +1,6 @@
 {
   "Category": "Weapon",
-  "Type": "ShortBlade",
+  "Type": "Melee",
 
   "Id": 101,
   "Name": "Poisoned Dagger",

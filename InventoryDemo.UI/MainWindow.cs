@@ -1,18 +1,18 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
 using CharacterMainLib;
 using DemoGameLib;
 using InventoryCoreLib;
-
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,6 +23,22 @@ public sealed partial class MainWindow : Window
     // Model update runs every second. UI refresh never performs game actions.
     private CancellationTokenSource? _gameLoopCts;
     private Task? _gameLoopTask;
+
+
+    #region [ REPAIR MODE ]
+
+    private const int RepairModeDurationSeconds = 10;
+
+    private RepairTool? _activeRepairTool;
+    private Position? _activeRepairToolPosition;
+
+    private CancellationTokenSource? _repairModeCts;
+
+    private DateTime _ignoreInventoryDoubleTapUntilUtc;
+
+    private Cursor? _repairCursor;
+
+    #endregion
 
     private async Task GameLoop(CancellationToken token)
     {
@@ -64,8 +80,22 @@ public sealed partial class MainWindow : Window
         _gameLoopTask = GameLoop(_gameLoopCts.Token);
     }
 
+    //замінив це
+    //protected override void OnClosed(EventArgs e)
+    //{
+    //    _gameLoopCts?.Cancel();
+
+    //    base.OnClosed(e);
+    //}
+
+    //на це
+
     protected override void OnClosed(EventArgs e)
     {
+        CancelRepairMode();
+
+        _repairCursor?.Dispose();
+
         _gameLoopCts?.Cancel();
 
         base.OnClosed(e);
@@ -138,6 +168,24 @@ public sealed partial class MainWindow : Window
 
         CanResize = false;
         Background = DarkBrown;
+
+        //Cursor change
+        var hammerBitmap = AssetLocator.LoadBitmap(
+            "UserInterfaceElements/RepairHammerCursor.png");
+
+                if (hammerBitmap is not null)
+                {
+                    _repairCursor = new Cursor(
+                        hammerBitmap,
+                        new PixelPoint(7, 13));
+                }
+
+                AddHandler(
+                    InputElement.KeyDownEvent,
+                    OnRepairModeKeyDown,
+                    RoutingStrategies.Tunnel,
+                    handledEventsToo: true);
+        //
 
         _character = CreateCharacter();
 
@@ -718,9 +766,50 @@ public sealed partial class MainWindow : Window
             Padding = new Thickness(4),
             Child = new Border { Background = Brushes.Transparent }
         };
+        //це я замінив
+        //cell.PointerPressed += (_, _) => SelectInventoryCell(pos, cell);
+        //cell.DoubleTapped += (_, _) => UseInventoryItem(pos, "Double-click");
 
-        cell.PointerPressed += (_, _) => SelectInventoryCell(pos, cell);
-        cell.DoubleTapped += (_, _) => UseInventoryItem(pos, "Double-click");
+        //на це
+
+        cell.PointerPressed += (_, e) =>
+        {
+            if (!e.GetCurrentPoint(cell).Properties.IsLeftButtonPressed)
+                return;
+
+            if (_activeRepairTool is not null)
+            {
+                _ignoreInventoryDoubleTapUntilUtc =
+                    DateTime.UtcNow.AddMilliseconds(650);
+
+                e.Handled = true;
+
+                TryRepairInventoryTarget(pos, cell);
+                return;
+            }
+
+            SelectInventoryCell(pos, cell);
+        };
+
+        cell.DoubleTapped += (_, e) =>
+        {
+            if (_activeRepairTool is not null ||
+                DateTime.UtcNow < _ignoreInventoryDoubleTapUntilUtc)
+            {
+                e.Handled = true;
+                return;
+            }
+
+            if (_character.Inventory.ItemAt(pos) is RepairTool tool)
+            {
+                StartRepairMode(pos, tool);
+                e.Handled = true;
+                return;
+            }
+
+            UseInventoryItem(pos, "Double-click");
+        };
+
         return cell;
     }
 
@@ -1040,8 +1129,7 @@ public sealed partial class MainWindow : Window
         Place(canvas, frame, 0, 0, width, height);
 
 
-        BaseItem? definition = GetDefinition(item);
-
+        BaseItem? definition = GetDefinition(item); 
 
         // ============================================================
         // MINIATURE
@@ -1109,7 +1197,7 @@ public sealed partial class MainWindow : Window
             180,
             145,
             190,
-            90);
+            140);
 
         infoLabel = info;
 
@@ -1134,7 +1222,7 @@ public sealed partial class MainWindow : Window
             TextAlignment = TextAlignment.Left
         };
 
-        Place(canvas, description, 52, 275, 325, 90);
+        Place(canvas, description, 52, 275, 325, 140);
 
         return canvas;
     }
@@ -1146,9 +1234,18 @@ public sealed partial class MainWindow : Window
             ? stackable.CurrentStackCount.ToString()
             : "1";
 
+        string durability = "";
+
+        if(item is IDurable durable)
+        {
+            durability = "Current Durability: ";
+            durability += durable.GetCurrentDurability().ToString();
+        }
+
         return $"Weight: {definition?.Weight:0.##}\n" +
                $"Price: {definition?.Price}\n" +
-               $"Stack: {stack}";
+               $"Stack: {stack}\n" +
+               $"{durability}";
     }
 
     private static void UpdateItemTooltipInfo(TextBlock label, IOwnedUsable item)
@@ -1300,6 +1397,125 @@ public sealed partial class MainWindow : Window
         LogHub.LineAdded -= OnLogLineAdded;
         _scenarioCancellation?.Cancel();
         _scenarioCancellation?.Dispose();
+    }
+
+    #endregion
+
+    //репейр моде
+    #region [ REPAIR MODE ]
+
+    private void StartRepairMode(
+        Position toolPosition,
+        RepairTool tool)
+    {
+        CancelRepairMode();
+
+        _activeRepairTool = tool;
+        _activeRepairToolPosition = toolPosition;
+
+        var cts = new CancellationTokenSource();
+        _repairModeCts = cts;
+
+        SetRepairCursor(true);
+
+        Console.WriteLine(
+            $"Repair mode started. " +
+            $"Select an item within {RepairModeDurationSeconds} seconds.");
+
+        _ = ExpireRepairModeAsync(cts);
+    }
+
+
+    private async Task ExpireRepairModeAsync(
+        CancellationTokenSource cts)
+    {
+        try
+        {
+            await Task.Delay(
+                TimeSpan.FromSeconds(RepairModeDurationSeconds),
+                cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        if (!ReferenceEquals(_repairModeCts, cts))
+            return;
+
+        CancelRepairMode();
+
+        Console.WriteLine("Repair mode expired.");
+    }
+
+
+    private void OnRepairModeKeyDown(
+        object? sender,
+        KeyEventArgs e)
+    {
+        if (e.Key != Key.Escape ||
+            _activeRepairTool is null)
+            return;
+
+        e.Handled = true;
+
+        CancelRepairMode();
+
+        Console.WriteLine("Repair cancelled.");
+    }
+
+
+    private void TryRepairInventoryTarget(
+    Position targetPosition,
+    Border targetCell)
+    {
+        try
+        {
+            _character.Repair(
+                _activeRepairTool!,
+                _character.Inventory.ItemAt(targetPosition) as IAffectable);
+
+            CancelRepairMode();
+
+            SelectInventoryCell(targetPosition, targetCell);
+
+            RefreshAll(0.0f);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Repair failed: {ex.Message}");
+        }
+    }
+
+
+    private void CancelRepairMode()
+    {
+        _activeRepairTool = null;
+        _activeRepairToolPosition = null;
+
+        var cts = _repairModeCts;
+        _repairModeCts = null;
+
+        cts?.Cancel();
+        cts?.Dispose();
+
+        SetRepairCursor(false);
+    }
+
+
+    private void SetRepairCursor(bool enabled)
+    {
+        Cursor? cursor = enabled
+            ? _repairCursor
+            : Avalonia.Input.Cursor.Default;
+
+        Cursor = cursor;
+        _inventoryCanvas.Cursor = cursor;
+
+        foreach (Border cell in _inventoryCells.Values)
+        {
+            cell.Cursor = cursor;
+        }
     }
 
     #endregion

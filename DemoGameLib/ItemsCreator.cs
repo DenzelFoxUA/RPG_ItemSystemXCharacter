@@ -37,7 +37,7 @@ namespace DemoGameLib
         {
             switch (weapon.Type)
             {
-                case "ShortBlade": return BuildShortBlade(weapon);
+                case "Melee": return BuildMelee(weapon);
                 case "Ranged": return BuildRanged(weapon);
                 //case "Bow": return BuildBow(weapon);
 
@@ -46,7 +46,7 @@ namespace DemoGameLib
             };
         }
 
-        private ShortBladeINS BuildShortBlade(DTO.ItemData data)
+        private MeleeWeaponINS BuildMelee(DTO.ItemData data)
         {
             ValidateWeaponData(data);
 
@@ -62,7 +62,7 @@ namespace DemoGameLib
                 BuildAttack(weapon.SecondaryAttack)
                     : null;
 
-            ShortBladeDefinition definition = new(
+            MeleeDefinition definition = new(
                 data.Id,
                 data.Name, 
                 data.Description, 
@@ -70,6 +70,7 @@ namespace DemoGameLib
                 data.Price,
                 durablePart.MaxDurability,
                 equipablePart.LevelRequired,
+                weapon.IsTwoHanded,
                 primaryAttack,
                 secondaryAttack,
                 durablePart.IsIndestructible,
@@ -79,7 +80,7 @@ namespace DemoGameLib
             IAffect [] effects =
                 BuildItemEffects(data);
 
-            return new ShortBladeINS(
+            return new MeleeWeaponINS(
                 definition,
                 effects);
         }
@@ -154,6 +155,38 @@ namespace DemoGameLib
             IAffect[] effects = BuildItemEffects(ammo);
 
             return new AmmoINS(definition, ammo.MaxStackSize, effects);
+        }
+
+        #endregion
+
+        #region =========== [ BUID TOOLS ] ====================================
+
+        private BaseItemINS BuildTool(DTO.ItemData itemData)
+        {
+
+            if (itemData.Tool is null)
+                throw new ObjectNotInitializedException(nameof(itemData.Tool));
+
+            DTO.ToolData tool = itemData.Tool;
+
+            ToolDefinition definition = new ToolDefinition(
+                itemData.Id,
+                itemData.Name,
+                tool.UseValue,
+                itemData.Description,
+                itemData.Weight,
+                itemData.Price,
+                itemData.MaxStackSize,
+                itemData.Icon,
+                itemData.Miniature2D);
+
+            return tool.ToolType switch
+            {
+                "Repair" => new RepairTool(definition,definition.MaxStackSize),
+                //"Lockpick" => new HelmetINS(definition, effects),
+                _ => throw new InvalidDataException(
+                    $"Unsupported item type: {itemData.Type}")
+            };
         }
 
         #endregion
@@ -372,7 +405,7 @@ namespace DemoGameLib
                 "Consumable" => BuildConsumable(item),
                 "Jewelry" => BuildJewelry(item),
                 "Ammo" => BuildAmmo(item),
-                //"Tool" => break;
+                "Tool" => BuildTool(item),
                 //"Scroll" => break;
                 //"Recharger" => break;
                 _ => throw new InvalidDataException(

@@ -114,6 +114,8 @@ namespace InventoryCoreLib
                 completeEffects = GetFullEffectsList();
             }
 
+            CurrentDurability--;
+
             return new AttackComplex(CurrentPrimaryDamage, dist, completeEffects);
         }
 
@@ -139,7 +141,9 @@ namespace InventoryCoreLib
 
                 completeEffects = GetFullEffectsList();
             }
-                
+
+            CurrentDurability--;
+
             return new AttackComplex(CurrentSecondaryDamage, dist, completeEffects);
         }
 

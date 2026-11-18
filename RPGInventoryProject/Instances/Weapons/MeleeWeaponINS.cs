@@ -5,17 +5,15 @@ using System;
 
 namespace InventoryCoreLib
 {
-    public class ShortBladeINS
-        : WeaponINS<IAffect, 
-            IAffectableCharacter>
+    public class MeleeWeaponINS
+        : WeaponINS<IAffect, IAffectableCharacter>, IDurable
     {
-        private ShortBladeDefinition Dagger => (ShortBladeDefinition)Definition!;
 
         private Action<IOwnedEquipable>? _useFunction = null;
         private Func<string, IOwnedEquipable?>? _unequipFunction = null;
 
-        public ShortBladeINS(ShortBladeDefinition daggerItem, 
-            params IAffect[]? effects) : base(daggerItem, effects)
+        public MeleeWeaponINS(MeleeDefinition meleeItem, 
+            params IAffect[]? effects) : base(meleeItem, effects)
         {
 
         }

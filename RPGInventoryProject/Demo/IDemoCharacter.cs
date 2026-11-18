@@ -1,6 +1,5 @@
 ﻿
 using CharacterMainLib;
-using System.Collections.Generic;
 
 namespace InventoryCoreLib
 {
@@ -8,7 +7,8 @@ namespace InventoryCoreLib
         ICollectEffects<IAffectableCharacter>,
         IAffectableCharacter, 
         ICanUseItems<IOwnedUsable>,
-        ICanUseEquipment<IOwnedEquipable>
+        ICanUseEquipment<IOwnedEquipable>,
+        ICanUseTools
     {
         public void UseConsumable(IOwnedUsable? consumable);
         public double GetMaxCarryWeight();

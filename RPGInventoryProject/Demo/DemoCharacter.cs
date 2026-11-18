@@ -77,6 +77,8 @@ namespace InventoryCoreLib
             
         }
 
+        public double GetMaxCarryWeight() => CurrCarryWeight;
+
         public void UseItem(Position itemPos, IAffectableActor? target)
         {
             if (_myInventory is null)
@@ -133,7 +135,11 @@ namespace InventoryCoreLib
             if (EquipmentSection is null)
                 throw new ObjectNotInitializedException(nameof(EquipmentSection));
 
+            if (_myInventory is null)
+                throw new ObjectNotInitializedException(nameof(EquipmentSection));
+
             _effectsManager.Update(deltaTime);
+            _myInventory.Update();
             EquipmentSection.Update(deltaTime);
 
             UpdateMovespeedByStats();
@@ -275,6 +281,22 @@ namespace InventoryCoreLib
 
         #endregion
 
+        public void Repair(IOwnedUsable tool, IAffectable? target)
+        {
+            if (tool is not RepairTool repTool)
+            {
+                throw new CannotUseItemException(nameof(tool));
+            }
+
+            repTool.SetMyTarget(target);
+
+            if(repTool.MyTarget is null)
+                throw new CannotUseItemException(nameof(tool));
+
+            repTool.RepairItem();
+
+        }
+
         #region [ CAPSULE ]
 
         private void SetItemTarget(ref IOwnedUsable item, IAffectableActor? target)
@@ -344,8 +366,6 @@ namespace InventoryCoreLib
             }
             Console.WriteLine("Consumable used!");
         }
-
-        public double GetMaxCarryWeight() => BaseFeatures.MaxCarryWeight;
 
         #endregion
 

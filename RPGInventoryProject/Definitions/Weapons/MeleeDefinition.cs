@@ -4,15 +4,16 @@ using System.Collections.Generic;
 
 namespace InventoryCoreLib
 {
-    public class ShortBladeDefinition : BaseWeapon
+    public class MeleeDefinition : BaseWeapon
     {
-        public ShortBladeDefinition(uint id, 
+        public MeleeDefinition(uint id, 
             string name, 
             string describtion, 
             double weight_kg,
             uint price,
             uint maxDurability,
             uint levelReq,
+            bool isTwoHanded,
             AttackDefinition primary,
             AttackDefinition? secondary,
             bool isIndestructible,
@@ -24,7 +25,7 @@ namespace InventoryCoreLib
             Descriprion = describtion;
             Weight = weight_kg;
             Price = price;
-            IsStackable = false;
+            IsStackable = isTwoHanded;
             MaxStackSize = 1;
             
             LevelRequired = levelReq;

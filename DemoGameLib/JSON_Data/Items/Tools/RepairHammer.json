@@ -1,0 +1,22 @@
+
+{
+  "Category": "Tool",
+  "Type": "Tool",
+
+  "Id": 901,
+  "Name": "Repair Hammer",
+  "Description": "A sturdy blacksmith's hammer used to restore the durability of damaged equipment.",
+  "Weight": 1.5,
+  "Price": 120,
+
+  "Icon": "Icons/Tools/RepairHammer.png",
+  "Miniature2D": "Miniatures2D/Tools/RepairHammer.png",
+
+  "IsStackable": true,
+  "MaxStackSize": 10,
+
+  "Tool": {
+    "ToolType": "Repair",
+    "UseValue": 25
+  }
+}

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace InventoryCoreLib
 {
     public abstract class WeaponINS<Effect,TTarget> : 
-        DurableInstance<Effect, TTarget>, ICanDealDamage
+        DurableInstance<Effect, TTarget>, ICanDealDamage, IDurable
        where Effect : class, IAffect
         where TTarget : class, IAffectable
     {
@@ -46,11 +46,14 @@ namespace InventoryCoreLib
 
             var dist = Weapon.PrimaryAttack.AttackRange;
 
+            TakeDamage(10);
+
             return new AttackComplex(CurrentPrimaryDamage, dist, Effects);
         }
 
         public virtual AttackComplex? SecondaryAttack(IAffectable? target)
         {
+
             if (Weapon.SecondaryAttack is null)
             {
                 return null;
@@ -58,7 +61,10 @@ namespace InventoryCoreLib
 
             var dist = Weapon.PrimaryAttack.AttackRange;
 
+            TakeDamage(10);
+
             return new AttackComplex(CurrentSecondaryDamage, dist, Effects);
+
         }
 
 
